@@ -1,6 +1,6 @@
 export interface Contest {
     problems: Problem[];
-    users: User[];
+    contestants: User[];
     submissions: Submission[];
     duration: number;
     penaltyTime: number;
