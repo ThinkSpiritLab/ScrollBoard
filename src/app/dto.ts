@@ -1,6 +1,6 @@
 export interface Contest {
     problems: Problem[];
-    contestants: User[];
+    teams: Team[];
     submissions: Submission[];
     duration: number;
     penaltyTime: number;
@@ -14,14 +14,14 @@ export interface Problem {
     color?: string;
 }
 
-export interface User {
+export interface Team {
     id: string;
     name: string;
 }
 
 export interface Submission {
     id: string;
-    userId: string;
+    teamId: string;
     problemId: string;
     submitTime: number;
     accepted: boolean;

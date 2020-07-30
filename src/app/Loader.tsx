@@ -83,8 +83,8 @@ const Loader: React.FC<LoaderProps> = ({ onLoad, onStart }: LoaderProps) => {
                             <Descriptions.Item label="题目数量">
                                 {data.problems.length}
                             </Descriptions.Item>
-                            <Descriptions.Item label="选手数量">
-                                {data.contestants.length}
+                            <Descriptions.Item label="队伍数量">
+                                {data.teams.length}
                             </Descriptions.Item>
                             <Descriptions.Item label="提交数量">
                                 {data.submissions.length}
