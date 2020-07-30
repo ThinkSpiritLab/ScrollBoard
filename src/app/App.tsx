@@ -19,11 +19,11 @@ const App: React.FC = () => {
             <Row justify="center" style={{ marginTop: "0em" }}>
                 <Col span={24} lg={16}>
                     {loader}
+                    {data === null ? null : (
+                        <Board data={data} />
+                    )}
                 </Col>
             </Row>
-            {data === null ? null : (
-                <Board data={data} />
-            )}
         </>
     );
 };
