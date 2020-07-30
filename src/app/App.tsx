@@ -5,6 +5,7 @@ import Loader from "./Loader";
 
 import React, { useState, } from "react";
 import { Row, Col, } from "antd";
+import Board from "./Board";
 
 const App: React.FC = () => {
     const [data, setData] = useState<dto.Contest | null>(null);
@@ -20,9 +21,9 @@ const App: React.FC = () => {
                     {loader}
                 </Col>
             </Row>
-            <Row>
-                {/* Hello, world! */}
-            </Row>
+            {data === null ? null : (
+                <Board data={data} />
+            )}
         </>
     );
 };
