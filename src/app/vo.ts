@@ -28,6 +28,7 @@ export enum ProblemStateKind {
 export interface ContestState {
     teamStates: TeamState[]
     contest: dto.Contest;
+    cursor: { index: number };
 }
 
 export function calcContestState(data: dto.Contest): ContestState {
@@ -62,18 +63,19 @@ export function calcContestState(data: dto.Contest): ContestState {
         if (!p) {
             throw new Error("invalid data");
         }
+        if (p.state === ProblemStateKind.Passed) {
+            return;
+        }
         if (submission.submitTime < data.freezeTime) {
-            if (p.state !== ProblemStateKind.Passed) {
-                p.revealedSubmissions.push(submission);
-                p.tryCount += 1;
-                if (submission.accepted) {
-                    p.state = ProblemStateKind.Passed;
-                    p.acceptTime = submission.submitTime;
-                    team.solved += 1;
-                    team.penalty += p.acceptTime + data.penaltyTime * (p.tryCount - 1);
-                } else {
-                    p.state = ProblemStateKind.Failed;
-                }
+            p.revealedSubmissions.push(submission);
+            p.tryCount += 1;
+            if (submission.accepted) {
+                p.state = ProblemStateKind.Passed;
+                p.acceptTime = submission.submitTime;
+                team.solved += 1;
+                team.penalty += p.acceptTime + data.penaltyTime * (p.tryCount - 1);
+            } else {
+                p.state = ProblemStateKind.Failed;
             }
         } else {
             p.unrevealedSubmissions.push(submission);
@@ -83,7 +85,7 @@ export function calcContestState(data: dto.Contest): ContestState {
     });
 
     const teamStates = Array.from(teamMap.entries()).map((e) => e[1]);
-    const state = { teamStates, contest: data };
+    const state = { teamStates, contest: data, cursor:{index: teamStates.length - 1} };
     calcRankInplace(state);
     return state;
 }
@@ -113,4 +115,51 @@ export function calcRankInplace(state: ContestState): void {
         last_solved = team.solved;
         last_penalty = team.penalty;
     });
+}
+
+export type HighlightItem = {
+    teamId: string;
+    problemId: null;
+} | {
+    teamId: string;
+    problemId: string;
+    accepted: boolean;
+}
+
+export type RevealGen = Generator<HighlightItem | undefined, void, void>;
+
+export function* reveal(state: ContestState): Generator<HighlightItem | undefined, void, void> {
+    while (state.cursor.index >= 0) {
+        const team = state.teamStates[state.cursor.index];
+        const p = team.problemStates.find(p => p.state === ProblemStateKind.Pending);
+        if (p) {
+            const isAccepted = p.unrevealedSubmissions.some((s) => s.accepted);
+            yield {
+                teamId: team.team.id,
+                problemId: p.problem.id,
+                accepted: isAccepted
+            };
+            if (isAccepted) {
+                p.state = ProblemStateKind.Passed;
+                const idx = p.unrevealedSubmissions.findIndex(s => s.accepted);
+                p.tryCount += idx + 1;
+                p.acceptTime = p.unrevealedSubmissions[idx].submitTime;
+                team.solved += 1;
+                team.penalty += p.acceptTime + state.contest.penaltyTime * (p.tryCount - 1);
+            } else {
+                p.state = ProblemStateKind.Failed;
+            }
+            p.revealedSubmissions.push(...p.unrevealedSubmissions);
+            p.unrevealedSubmissions = [];
+            const prevRank = team.rank;
+            calcRankInplace(state);
+            const curRank = team.rank;
+            console.log(`team "${team.team.name}" rank ${prevRank} -> ${curRank}`);
+            yield;
+        }
+        else {
+            yield { teamId: team.team.id, problemId: null };
+            state.cursor.index -= 1;
+        }
+    }
 }
