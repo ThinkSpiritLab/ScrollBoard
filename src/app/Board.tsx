@@ -3,7 +3,7 @@ import * as vo from "./vo";
 
 import React, { useState, useEffect, useCallback, useRef, CSSProperties, useMemo } from "react";
 import { Card } from "antd";
-
+import { Flipper, Flipped } from "react-flip-toolkit";
 
 function cvtColor(state: vo.ProblemStateKind): string | undefined {
     if (state === vo.ProblemStateKind.Passed) {
@@ -30,19 +30,16 @@ const Board: React.FC<BoardProps> = ({ data }: BoardProps) => {
 
     const revealGen = useRef<vo.RevealGen>(vo.reveal(state));
 
-    const handleNextStep = useCallback((event: KeyboardEvent) => {
-        if (event.key === "Enter") {
-            const g = revealGen.current;
-            const item = g.next();
-            if (!item.done) {
-                if (item.value) {
-                    setHighlightItem(item.value);
-                } else {
-                    console.log("state.cursor.index", state.cursor.index);
-                    setHighlightItem({ teamId: state.teamStates[state.cursor.index].team.id, problemId: null });
-                    setState({ ...state });
-                }
+    const handleNextStep = useCallback(() => {
+        const g = revealGen.current;
+        const item = g.next();
+        if (!item.done) {
+            if (item.value) {
+                setHighlightItem(item.value);
+            } else {
+                setHighlightItem(null);
             }
+            setState({ ...state });
         }
     }, [state, setState]);
 
@@ -51,12 +48,16 @@ const Board: React.FC<BoardProps> = ({ data }: BoardProps) => {
         return () => document.removeEventListener("keydown", handleNextStep);
     }, [handleNextStep]);
 
-    const scrollRef = useRef<HTMLTableRowElement | null>(null);
-    useEffect(() => {
-        if (scrollRef.current) {
-            scrollRef.current.scrollIntoView();
-        }
-    }, [highlightItem]);
+    // useEffect(() => {
+    //     if (state.cursor.index >= 0) {
+    //         const team = state.teamStates[state.cursor.index];
+    //         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    //         const element = document.querySelector(`#team-id-${team.team.id}`)!;
+    //         const top = element.getBoundingClientRect().top + window.scrollY - window.innerHeight / 2;
+    //         console.log("scrollTo", top, element.getBoundingClientRect().top, window.scrollY, window.innerHeight, element);
+    //         window.scrollTo({ left: 0, top, behavior: "smooth" });
+    //     }
+    // }, [state]);
 
     return (
         <Card
@@ -96,53 +97,59 @@ const Board: React.FC<BoardProps> = ({ data }: BoardProps) => {
                         ))}
                     </tr>
                 </thead>
-                <tbody>
-                    {state.teamStates.map((team) => {
-                        const isHighlighted = highlightItem
-                            && highlightItem.teamId === team.team.id;
+                <Flipper
+                    flipKey={state.teamStates.map(t => t.team.id).join(" ")} 
+                    element="tbody"
+                >
+                    {state.teamStates.map((team, idx) => {
+                        const isFocused = idx === state.cursor.index;
 
                         return (
-                            <tr
+                            <Flipped
                                 key={team.team.id}
-                                style={{
-                                    border: isHighlighted ? "1px solid blue" : "transparent",
-                                }}
-                                ref={isHighlighted ? scrollRef : undefined}
+                                flipId={team.team.id}
                             >
-                                <td>
-                                    {team.rank}
-                                </td>
-                                <td>
-                                    {team.team.name}
-                                </td>
-                                <td>
-                                    {team.solved}
-                                </td>
-                                <td>
-                                    {Math.floor(team.penalty / 60000)}
-                                </td>
-                                {team.problemStates.map((p) => {
-                                    const isHighlighted = highlightItem
-                                        && highlightItem.teamId === team.team.id
-                                        && highlightItem.problemId === p.problem.id;
+                                <tr
+                                    id={`team-id-${team.team.id}`}
+                                    style={{
+                                        border: isFocused ? "1px solid blue" : "transparent",
+                                    }}
+                                >
+                                    <td>
+                                        {team.rank}
+                                    </td>
+                                    <td>
+                                        {team.team.name}
+                                    </td>
+                                    <td>
+                                        {team.solved}
+                                    </td>
+                                    <td>
+                                        {Math.floor(team.penalty / 60000)}
+                                    </td>
+                                    {team.problemStates.map((p) => {
+                                        const isHighlighted = highlightItem
+                                            && highlightItem.teamId === team.team.id
+                                            && highlightItem.problemId === p.problem.id;
 
-                                    return (
-                                        <td key={p.problem.id}>
-                                            <span style={{
-                                                display: "inline-block",
-                                                minWidth: "4em",
-                                                minHeight: "1em",
-                                                borderRadius: "3px",
-                                                backgroundColor: cvtColor(p.state),
-                                                border: isHighlighted ? "1px solid blue" : undefined,
-                                            }} />
-                                        </td>
-                                    );
-                                })}
-                            </tr>
+                                        return (
+                                            <td key={p.problem.id}>
+                                                <span style={{
+                                                    display: "inline-block",
+                                                    minWidth: "4em",
+                                                    minHeight: "1em",
+                                                    borderRadius: "3px",
+                                                    backgroundColor: cvtColor(p.state),
+                                                    border: isHighlighted ? "1px solid blue" : undefined,
+                                                }} />
+                                            </td>
+                                        );
+                                    })}
+                                </tr>
+                            </Flipped>
                         );
                     })}
-                </tbody>
+                </Flipper>
             </table>
         </Card>
     );
