@@ -72,7 +72,7 @@ export function calcContestState(data: dto.Contest): ContestState {
                 p.state = ProblemStateKind.Passed;
                 p.acceptTime = submission.submitTime;
                 team.solved += 1;
-                team.penalty += p.acceptTime + data.penaltyTime * (p.tryCount - 1);
+                team.penalty += Math.floor(p.acceptTime / 60000) * 60000 + data.penaltyTime * (p.tryCount - 1);
             } else {
                 p.state = ProblemStateKind.Failed;
             }
@@ -106,9 +106,9 @@ export function calcRankInplace(state: ContestState): void {
     let last_solved = 0;
     let last_penalty = 0;
     let last_rank = 0;
-    state.teamStates.forEach((team) => {
+    state.teamStates.forEach((team, idx) => {
         if (team.solved < last_solved || team.penalty > last_penalty) {
-            last_rank += 1;
+            last_rank = idx + 1;
         }
         team.rank = last_rank;
         last_solved = team.solved;
@@ -139,19 +139,20 @@ export function* reveal(state: ContestState): Generator<HighlightItem | undefine
             if (isAccepted) {
                 p.state = ProblemStateKind.Passed;
                 const idx = p.unrevealedSubmissions.findIndex(s => s.accepted);
-                p.tryCount += idx + 1;
+                p.tryCount = p.tryCount - p.unrevealedSubmissions.length + idx + 1;
                 p.acceptTime = p.unrevealedSubmissions[idx].submitTime;
                 team.solved += 1;
-                team.penalty += p.acceptTime + state.contest.penaltyTime * (p.tryCount - 1);
+                team.penalty += Math.floor(p.acceptTime / 60000) * 60000 + state.contest.penaltyTime * (p.tryCount - 1);
             } else {
                 p.state = ProblemStateKind.Failed;
             }
             p.revealedSubmissions.push(...p.unrevealedSubmissions);
             p.unrevealedSubmissions = [];
+            yield;
             const prevRank = team.rank;
             calcRankInplace(state);
             const curRank = team.rank;
-            console.log(`team "${team.team.name}" rank ${prevRank} -> ${curRank}`);
+            console.log(`team "${team.team.name.padEnd(30, " ")}" rank ${prevRank} -> ${curRank}`);
             yield;
             checked = true;
         }

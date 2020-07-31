@@ -1,4 +1,5 @@
 import "antd/dist/antd.css";
+import "./App.css";
 
 import * as dto from "./dto";
 import Loader from "./Loader";
@@ -9,21 +10,23 @@ import Board from "./Board";
 
 const App: React.FC = () => {
     const [data, setData] = useState<dto.Contest | null>(null);
-
-    const loader = (
-        <Loader onLoad={(data) => setData(data)} onStart={() => console.log(data)} />
-    );
+    const [running, setRunning] = useState(false);
 
     return (
         <>
             <Row justify="center" style={{ marginTop: "0em" }}>
                 <Col span={24} lg={16}>
-                    {loader}
-                    {data === null ? null : (
-                        <Board data={data} />
-                    )}
+                    {!running ? (
+                        <Loader onLoad={(data) => setData(data)} onStart={() => setRunning(true)} />
+                    ) : null}
                 </Col>
             </Row>
+            <Row justify="center" style={{ width: "calc(100vw - 4px)" }}>
+                {(data !== null && running) ? (
+                    <Board data={data} />
+                ) : null}
+            </Row>
+            <div style={{ minHeight: "50vh" }}></div>
         </>
     );
 };
