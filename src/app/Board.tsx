@@ -1,7 +1,7 @@
 import * as dto from "./dto";
 import * as vo from "./vo";
 
-import React, { useState, useEffect, useCallback, useRef, CSSProperties, useMemo } from "react";
+import React, { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { Card } from "antd";
 import { Flipper, Flipped } from "react-flip-toolkit";
 
@@ -66,7 +66,12 @@ const Board: React.FC<BoardProps> = ({ data }: BoardProps) => {
                 boxShadow: "0 1px 2px -2px rgba(0, 0, 0, 0.16), 0 3px 6px 0 rgba(0, 0, 0, 0.12), 0 5px 12px 4px rgba(0, 0, 0, 0.09)",
             }}
         >
-            <table style={{ width: "100%" }}>
+            <table
+                style={{
+                    width: "100%",
+                    overflowAnchor: "none"
+                }}
+            >
                 <thead>
                     <tr>
                         <th>
@@ -98,7 +103,7 @@ const Board: React.FC<BoardProps> = ({ data }: BoardProps) => {
                     </tr>
                 </thead>
                 <Flipper
-                    flipKey={state.teamStates.map(t => t.team.id).join(" ")} 
+                    flipKey={state.teamStates.map(t => t.team.id).join(" ")}
                     element="tbody"
                 >
                     {state.teamStates.map((team, idx) => {

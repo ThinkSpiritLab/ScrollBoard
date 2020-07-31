@@ -1,5 +1,4 @@
 import * as dto from "./dto";
-import d3 from "d3-array";
 
 export interface TeamState {
     team: dto.Team;
