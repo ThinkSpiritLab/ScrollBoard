@@ -35,7 +35,7 @@ const BoardRow: React.FC<BoardRowProps> = ({ state }: BoardRowProps) => {
                 {state.solved}
             </td>
             <td>
-                {state.penalty}
+                {Math.floor(state.penalty / 60000)}
             </td>
             {state.problemStates.map((p) => (
                 <td key={p.problem.id}>

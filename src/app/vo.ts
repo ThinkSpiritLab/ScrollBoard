@@ -1,4 +1,5 @@
 import * as dto from "./dto";
+import d3 from "d3-array";
 
 export interface TeamState {
     team: dto.Team;
@@ -14,6 +15,7 @@ export interface ProblemState {
     unrevealedSubmissions: dto.Submission[];
     state: ProblemStateKind;
     tryCount: number;
+    acceptTime: number | null;
 }
 
 export enum ProblemStateKind {
@@ -35,7 +37,7 @@ export function calcContestState(data: dto.Contest): ContestState {
             contestant.id,
             {
                 team: contestant,
-                rank: 1,
+                rank: 0,
                 solved: 0,
                 penalty: 0,
                 problemStates: data.problems.map(problem => ({
@@ -44,29 +46,71 @@ export function calcContestState(data: dto.Contest): ContestState {
                     unrevealedSubmissions: [],
                     state: ProblemStateKind.Untouched,
                     tryCount: 0,
+                    acceptTime: null,
                 }))
             });
     });
 
+    data.submissions.sort((lhs, rhs) => lhs.submitTime - rhs.submitTime);
+
     data.submissions.forEach(submission => {
-        const state = teamMap.get(submission.teamId);
-        if (!state) {
+        const team = teamMap.get(submission.teamId);
+        if (!team) {
             throw new Error("invalid data");
         }
-        const p = state.problemStates.find(p => p.problem.id === submission.problemId);
+        const p = team.problemStates.find(p => p.problem.id === submission.problemId);
         if (!p) {
             throw new Error("invalid data");
         }
-        p.unrevealedSubmissions.push(submission);
-        p.tryCount += 1;
-        p.state = ProblemStateKind.Pending;
+        if (submission.submitTime < data.freezeTime) {
+            if (p.state !== ProblemStateKind.Passed) {
+                p.revealedSubmissions.push(submission);
+                p.tryCount += 1;
+                if (submission.accepted) {
+                    p.state = ProblemStateKind.Passed;
+                    p.acceptTime = submission.submitTime;
+                    team.solved += 1;
+                    team.penalty += p.acceptTime + data.penaltyTime * (p.tryCount - 1);
+                } else {
+                    p.state = ProblemStateKind.Failed;
+                }
+            }
+        } else {
+            p.unrevealedSubmissions.push(submission);
+            p.tryCount += 1;
+            p.state = ProblemStateKind.Pending;
+        }
     });
 
-    const contestantStates = Array.from(teamMap.entries()).map((e) => e[1]);
+    const teamStates = Array.from(teamMap.entries()).map((e) => e[1]);
+    const state = { teamStates, contest: data };
+    calcRankInplace(state);
+    return state;
+}
 
-    return {
-        teamStates: contestantStates,
-        contest: data
-    };
+export function calcRankInplace(state: ContestState): void {
+    state.teamStates.sort((lhs, rhs) => {
+        if (lhs.solved !== rhs.solved) {
+            return -(lhs.solved - rhs.solved);
+        }
+        if (lhs.penalty !== rhs.penalty) {
+            return (lhs.penalty - rhs.penalty);
+        }
+        if (lhs.team.name !== rhs.team.name) {
+            return lhs.team.name < rhs.team.name ? (-1) : (1);
+        }
+        return 0;
+    });
 
+    let last_solved = 0;
+    let last_penalty = 0;
+    let last_rank = 0;
+    state.teamStates.forEach((team) => {
+        if (team.solved < last_solved || team.penalty > last_penalty) {
+            last_rank += 1;
+        }
+        team.rank = last_rank;
+        last_solved = team.solved;
+        last_penalty = team.penalty;
+    });
 }
