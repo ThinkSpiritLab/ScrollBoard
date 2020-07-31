@@ -16,6 +16,7 @@
     "d3-array": "^2.5.0",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
+    "react-flip-toolkit": "^7.0.12",
     "react-scripts": "3.4.1",
     "typescript": "~3.9.7"
   },
