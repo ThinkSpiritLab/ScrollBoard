@@ -178,4 +178,5 @@ export function* reveal(state: ContestState): Generator<HighlightItem | undefine
 export interface BoardOptions {
     autoReveal: boolean;
     shiningBeforeReveal: boolean;
+    speedFactor: number;
 }

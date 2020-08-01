@@ -3,7 +3,7 @@ import * as util from "./util";
 import * as vo from "./vo";
 
 import React, { useState, useRef, useEffect, useCallback, } from "react";
-import { Card, Button, Row, Divider, Descriptions, Space, Tag, Col, Form, Switch } from "antd";
+import { Card, Button, Row, Divider, Descriptions, Space, Tag, Col, Form, Switch, InputNumber } from "antd";
 import { UploadOutlined, PlayCircleOutlined } from "@ant-design/icons";
 import * as queryString from "query-string";
 
@@ -57,7 +57,8 @@ const Loader: React.FC<LoaderProps> = ({ onLoad, onStart }: LoaderProps) => {
     const handleStart = useCallback(() => {
         const autoReveal = !!form.getFieldValue("autoReveal");
         const shiningBeforeReveal = !!form.getFieldValue("shiningBeforeReveal");
-        onStart({ autoReveal, shiningBeforeReveal });
+        const speedFactor = parseFloat(form.getFieldValue("speedFactor"));
+        onStart({ autoReveal, shiningBeforeReveal, speedFactor });
     }, [onStart, form]);
 
     return (
@@ -157,7 +158,7 @@ const Loader: React.FC<LoaderProps> = ({ onLoad, onStart }: LoaderProps) => {
                     </Row>
                     <Row>
                         <Form form={form} style={{ width: "100%" }} layout="inline"
-                            initialValues={{ autoReveal: false, shiningBeforeReveal: true }}
+                            initialValues={{ autoReveal: false, shiningBeforeReveal: true, speedFactor: 1 }}
                         >
                             <Form.Item name="autoReveal" label="自动运行" valuePropName="checked">
                                 <Switch />
@@ -165,9 +166,12 @@ const Loader: React.FC<LoaderProps> = ({ onLoad, onStart }: LoaderProps) => {
                             <Form.Item name="shiningBeforeReveal" label="题目闪烁动画" valuePropName="checked">
                                 <Switch />
                             </Form.Item>
+                            <Form.Item name="speedFactor" label="速度因子">
+                                <InputNumber min={0.1} max={10} step={0.1} />
+                            </Form.Item>
                         </Form>
                     </Row>
-                    <Row justify="center">
+                    <Row justify="center" style={{ marginTop: "1em" }}>
                         <Col span={6} style={{ display: "flex", justifyContent: "center" }}>
                             <Button
                                 icon={<PlayCircleOutlined />}

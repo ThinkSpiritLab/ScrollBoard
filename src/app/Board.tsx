@@ -1,13 +1,11 @@
-import "./Board.css";
-
 import * as dto from "./dto";
 import * as vo from "./vo";
 import * as util from "./util";
 
-import React, { useState, useEffect, useCallback, useRef, useMemo } from "react";
+import React, { useState, useEffect, useCallback, useRef, useMemo, CSSProperties } from "react";
 import FlipMove from "react-flip-move";
 import { StickyContainer, Sticky } from "react-sticky";
-import { CSSTransition } from "react-transition-group";
+import { Transition } from "react-transition-group";
 
 function cvtColor(state: vo.ProblemStateKind): string | undefined {
     if (state === vo.ProblemStateKind.Passed) {
@@ -42,6 +40,7 @@ const Board: React.FC<BoardProps> = ({ data, options }: BoardProps) => {
     const [keyLock, setKeyLock] = useState<boolean>(false);
 
     const [autoReveal, setAutoReveal] = useState<boolean>(options.autoReveal);
+    const [speedFactor, setSpeedFactor] = useState<number>(options.speedFactor);
 
     const handleNextStep = useCallback(() => {
         console.log("handleNextStep");
@@ -63,10 +62,15 @@ const Board: React.FC<BoardProps> = ({ data, options }: BoardProps) => {
                     setKeyLock(true);
                     console.log("locked");
                     setHighlightItem(value);
-                    await util.delay(options.shiningBeforeReveal ? 1200 : 400);
+
+                    let delay = options.shiningBeforeReveal ? 1200 : 400;
+                    await util.delay(delay / speedFactor);
                     handleNextStep();
-                    await util.delay(value.accepted ? 800 : 300);
+
+                    delay = value.accepted ? 800 : 300;
+                    await util.delay(delay / speedFactor);
                     handleNextStep();
+
                     setKeyLock(false);
                     console.log("unlocked");
                 })();
@@ -78,7 +82,7 @@ const Board: React.FC<BoardProps> = ({ data, options }: BoardProps) => {
         }
         setState({ ...state });
         return item.done;
-    }, [state, options]);
+    }, [state, speedFactor, options.shiningBeforeReveal]);
 
     // useEffect(() => {
     //     if (state.cursor.tick === 0) {
@@ -104,8 +108,17 @@ const Board: React.FC<BoardProps> = ({ data, options }: BoardProps) => {
     //     }
     // }, [state]);
 
+    useEffect(() => {
+        if (state.cursor.tick === 0) {
+            const team = state.teamStates[state.cursor.index];
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            const element = document.querySelector<HTMLTableRowElement>(`#team-id-${team.info.id}`)!;
+            element.scrollIntoView({ behavior: "smooth" });
+        }
+    }, [state]);
+
     const handleKeydown = useCallback((e: KeyboardEvent) => {
-        console.log("keydown");
+        console.log("keydown", e.key);
         if (e.key === "Enter") {
             if (keyLock) {
                 return;
@@ -122,7 +135,19 @@ const Board: React.FC<BoardProps> = ({ data, options }: BoardProps) => {
                 return !a;
             });
         }
-    }, [handleNextStep, keyLock]);
+        if (e.key === "+") {
+            const s = speedFactor + 0.1;
+            if (s > 10) { return; }
+            setSpeedFactor(s);
+            console.log("speedFactor", s);
+        }
+        if (e.key === "-") {
+            const s = speedFactor - 0.1;
+            if (s < 0.1) { return; }
+            setSpeedFactor(s);
+            console.log("speedFactor", s);
+        }
+    }, [handleNextStep, keyLock, speedFactor]);
 
     useEffect(() => {
         document.addEventListener("keydown", handleKeydown);
@@ -141,25 +166,28 @@ const Board: React.FC<BoardProps> = ({ data, options }: BoardProps) => {
     }, [handleClick]);
 
     useEffect(() => {
-        if (state.cursor.tick !== 0 && autoReveal) {
+        if (state.cursor.tick !== 0 && autoReveal && state.cursor.index >= 0) {
             const timer = setInterval(() => {
                 if (keyLock) { return; }
                 const done = handleNextStep();
                 if (done) { clearInterval(timer); }
-            }, 500);
+            }, 500 / speedFactor);
             return () => clearInterval(timer);
         }
-    }, [state, keyLock, handleNextStep, autoReveal]);
+    }, [state, keyLock, handleNextStep, autoReveal, speedFactor]);
 
     useEffect(() => {
         if (highlightItem && options.shiningBeforeReveal) {
+            setHighlightFlag(f => !f);
             const timer = setInterval(() => {
-                console.log("flag", !highlightFlag);
-                setHighlightFlag(!highlightFlag);
+                setHighlightFlag(f => {
+                    console.log("flag", !f);
+                    return !f;
+                });
             }, 400);
             return () => clearInterval(timer);
         }
-    }, [highlightItem, highlightFlag, options]);
+    }, [highlightItem, options]);
 
     return (
         <StickyContainer style={{ width: "100%" }}>
@@ -233,7 +261,7 @@ const Board: React.FC<BoardProps> = ({ data, options }: BoardProps) => {
                     fontSize: "2em",
                     textAlign: "center",
                 }}
-                duration={2000}
+                duration={2000 / speedFactor}
             >
 
                 {state.teamStates.map((team, idx) => {
@@ -267,7 +295,7 @@ const Board: React.FC<BoardProps> = ({ data, options }: BoardProps) => {
                                             && highlightItem.teamId === team.info.id
                                             && highlightItem.problemId === p.info.id;
 
-                                        const grid = (
+                                        const grid = (style: CSSProperties) => (
                                             <span
                                                 style={{
                                                     display: "inline-block",
@@ -276,6 +304,9 @@ const Board: React.FC<BoardProps> = ({ data, options }: BoardProps) => {
                                                     borderRadius: "0.25em",
                                                     backgroundColor: cvtColor(p.state),
                                                     color: "white",
+                                                    transition: `opacity ${duration}ms ease-in-out`,
+                                                    opacity: 1,
+                                                    ...style
                                                 }}
                                                 ref={isHighlighted ? highlightNodeRef : null}
                                             >
@@ -287,16 +318,24 @@ const Board: React.FC<BoardProps> = ({ data, options }: BoardProps) => {
                                             </span>
                                         );
 
+                                        const duration = 400 / speedFactor;
+                                        const transitionStyles = {
+                                            entering: { opacity: 0 },
+                                            entered: { opacity: 0 },
+                                            exiting: { opacity: 1 },
+                                            exited: { opacity: 1 },
+                                            unmounted: {}
+                                        };
+
                                         const wrappedGrid = isHighlighted ? (
-                                            <CSSTransition
+                                            <Transition
                                                 in={highlightFlag}
-                                                timeout={400}
-                                                classNames="problem-grid"
+                                                timeout={duration}
                                                 nodeRef={highlightNodeRef}
                                             >
-                                                {grid}
-                                            </CSSTransition>
-                                        ) : grid;
+                                                {(state) => grid(transitionStyles[state])}
+                                            </Transition>
+                                        ) : grid({});
 
                                         return (
                                             <td key={p.info.id} style={{ width: `${60 / team.problemStates.length}%` }}>
