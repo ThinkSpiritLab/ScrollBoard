@@ -1,0 +1,1 @@
+{"version":3,"sources":["App.css"],"names":[],"mappings":"AAAA,KACI,oBACJ,CAEA,oBACI,YACJ","file":"main.651be2ac.chunk.css","sourcesContent":["html{\n    scrollbar-width: none;\n}\n\n::-webkit-scrollbar{\n    display: none;\n}\n\n"]}
