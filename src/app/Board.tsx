@@ -112,8 +112,18 @@ const Board: React.FC<BoardProps> = ({ data, options }: BoardProps) => {
     useEffect(() => {
         document.addEventListener("keydown", handleKeydown);
         return () => document.removeEventListener("keydown", handleKeydown);
-
     }, [handleKeydown]);
+
+    const handleClick = useCallback(() => {
+        if (keyLock) { return; }
+        console.log("click");
+        handleNextStep();
+    }, [handleNextStep, keyLock]);
+
+    useEffect(() => {
+        document.addEventListener("click", handleClick);
+        return () => document.removeEventListener("click", handleClick);
+    }, [handleClick]);
 
     useEffect(() => {
         if (state.cursor.tick !== 0 && options.autoReveal) {
