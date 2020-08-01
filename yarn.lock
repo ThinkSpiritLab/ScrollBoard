@@ -4911,13 +4911,6 @@ flatten@^1.0.2:
   resolved "https://registry.npm.taobao.org/flatten/download/flatten-1.0.3.tgz#c1283ac9f27b368abc1e36d1ff7b04501a30356b"
   integrity sha1-wSg6yfJ7Noq8HjbR/3sEUBowNWs=
 
-flip-toolkit@7.0.11:
-  version "7.0.11"
-  resolved "https://registry.npm.taobao.org/flip-toolkit/download/flip-toolkit-7.0.11.tgz#b7a1a7e97fd4fa2f3d0cf088f77c422278c9e915"
-  integrity sha1-t6Gn6X/U+i89DPCI93xCInjJ6RU=
-  dependencies:
-    rematrix "0.2.2"
-
 flush-write-stream@^1.0.0:
   version "1.1.1"
   resolved "https://registry.npm.taobao.org/flush-write-stream/download/flush-write-stream-1.1.1.tgz#8dd7d873a1babc207d94ead0c2e0e44276ebf2e8"
@@ -8783,7 +8776,7 @@ prompts@^2.0.1:
     kleur "^3.0.3"
     sisteransi "^1.0.4"
 
-prop-types@^15.5.7, prop-types@^15.5.8, prop-types@^15.6.2, prop-types@^15.7.2:
+prop-types@^15.5.8, prop-types@^15.6.2, prop-types@^15.7.2:
   version "15.7.2"
   resolved "https://registry.npm.taobao.org/prop-types/download/prop-types-15.7.2.tgz?cache=0&other_urls=https%3A%2F%2Fregistry.npm.taobao.org%2Fprop-types%2Fdownload%2Fprop-types-15.7.2.tgz#52c41e75b8c87e72b9d9360e0206b99dcbffa6c5"
   integrity sha1-UsQedbjIfnK52TYOAga5ncv/psU=
@@ -9317,13 +9310,10 @@ react-error-overlay@^6.0.7:
   resolved "https://registry.npm.taobao.org/react-error-overlay/download/react-error-overlay-6.0.7.tgz#1dcfb459ab671d53f660a991513cb2f0a0553108"
   integrity sha1-Hc+0WatnHVP2YKmRUTyy8KBVMQg=
 
-react-flip-toolkit@^7.0.12:
-  version "7.0.12"
-  resolved "https://registry.npm.taobao.org/react-flip-toolkit/download/react-flip-toolkit-7.0.12.tgz#bc74247d2661cf4f693e73c707b8c7788eab2a96"
-  integrity sha1-vHQkfSZhz09pPnPHB7jHeI6rKpY=
-  dependencies:
-    flip-toolkit "7.0.11"
-    prop-types "^15.5.7"
+react-flip-move@^3.0.4:
+  version "3.0.4"
+  resolved "https://registry.npm.taobao.org/react-flip-move/download/react-flip-move-3.0.4.tgz#261f66101fbc305f9b7b28959c5cf8236413ca74"
+  integrity sha1-Jh9mEB+8MF+beyiVnFz4I2QTynQ=
 
 react-is@^16.12.0, react-is@^16.7.0, react-is@^16.8.1, react-is@^16.8.4:
   version "16.13.1"
@@ -9589,11 +9579,6 @@ relateurl@^0.2.7:
   version "0.2.7"
   resolved "https://registry.npm.taobao.org/relateurl/download/relateurl-0.2.7.tgz#54dbf377e51440aca90a4cd274600d3ff2d888a9"
   integrity sha1-VNvzd+UUQKypCkzSdGANP/LYiKk=
-
-rematrix@0.2.2:
-  version "0.2.2"
-  resolved "https://registry.npm.taobao.org/rematrix/download/rematrix-0.2.2.tgz#c96a050260782db9908904885991256e23beda5d"
-  integrity sha1-yWoFAmB4LbmQiQSIWZElbiO+2l0=
 
 remove-trailing-separator@^1.0.1:
   version "1.1.0"
