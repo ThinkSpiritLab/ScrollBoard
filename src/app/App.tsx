@@ -21,12 +21,14 @@ const App: React.FC = () => {
         console.debug(data, options);
     }, [data]);
 
+    const handleLoad = useCallback((data) => setData(data), []);
+
     return (
         <>
             {!running ? (
                 <Row justify="center" style={{ marginTop: "0em", alignItems: "center", minHeight: "80vh" }}>
                     <Col span={24} lg={16}>
-                        <Loader onLoad={(data) => setData(data)} onStart={handleStart} />
+                        <Loader onLoad={handleLoad} onStart={handleStart} />
                     </Col>
                 </Row>
             ) : null}
