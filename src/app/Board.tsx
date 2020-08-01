@@ -40,6 +40,8 @@ const Board: React.FC<BoardProps> = ({ data, options }: BoardProps) => {
 
     const [keyLock, setKeyLock] = useState<boolean>(false);
 
+    const [autoReveal, setAutoReveal] = useState<boolean>(options.autoReveal);
+
     const handleNextStep = useCallback(() => {
         console.log("handleNextStep");
         const prevCursorIdx = state.cursor.index;
@@ -98,12 +100,22 @@ const Board: React.FC<BoardProps> = ({ data, options }: BoardProps) => {
     }, [state]);
 
     const handleKeydown = useCallback((e: KeyboardEvent) => {
-        if (keyLock) {
-            return;
-        }
         console.log("keydown");
         if (e.key === "Enter") {
+            if (keyLock) {
+                return;
+            }
             handleNextStep();
+        }
+        if (e.key === "p") {
+            setAutoReveal(a => {
+                if (a) {
+                    console.log("disable autoReveal");
+                } else {
+                    console.log("enable autoReveal");
+                }
+                return !a;
+            });
         }
     }, [handleNextStep, keyLock]);
 
@@ -124,7 +136,7 @@ const Board: React.FC<BoardProps> = ({ data, options }: BoardProps) => {
     }, [handleClick]);
 
     useEffect(() => {
-        if (state.cursor.tick !== 0 && options.autoReveal) {
+        if (state.cursor.tick !== 0 && autoReveal) {
             const timer = setInterval(() => {
                 if (keyLock) { return; }
                 const done = handleNextStep();
@@ -132,7 +144,7 @@ const Board: React.FC<BoardProps> = ({ data, options }: BoardProps) => {
             }, 500);
             return () => clearInterval(timer);
         }
-    }, [state, keyLock, handleNextStep, options]);
+    }, [state, keyLock, handleNextStep, autoReveal]);
 
     useEffect(() => {
         if (highlightItem) {
