@@ -102,8 +102,6 @@ const Board: React.FC<BoardProps> = ({ data, options }: BoardProps) => {
             return;
         }
         console.log("keydown");
-        e.preventDefault();
-        e.stopPropagation();
         if (e.key === "Enter") {
             handleNextStep();
         }
