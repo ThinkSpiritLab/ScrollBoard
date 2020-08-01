@@ -2,6 +2,7 @@ import "./Board.css";
 
 import * as dto from "./dto";
 import * as vo from "./vo";
+import * as util from "./util";
 
 import React, { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import FlipMove from "react-flip-move";
@@ -56,15 +57,19 @@ const Board: React.FC<BoardProps> = ({ data, options }: BoardProps) => {
         console.log("cursor index = ", state.cursor.index);
         if (!item.done) {
             if (item.value) {
-                console.log("reveal highlight");
-                setKeyLock(true);
-                setHighlightItem(item.value);
-                setTimeout(() => handleNextStep(), 1200);
-                setTimeout(() => {
+                const value = item.value;
+                void (async (): Promise<void> => {
+                    console.log("reveal highlight");
+                    setKeyLock(true);
+                    console.log("locked");
+                    setHighlightItem(value);
+                    await util.delay(options.shiningBeforeReveal ? 1200 : 400);
+                    handleNextStep();
+                    await util.delay(value.accepted ? 800 : 300);
                     handleNextStep();
                     setKeyLock(false);
                     console.log("unlocked");
-                }, 1500 + (item.value.accepted ? 500 : 0));
+                })();
             } else {
                 setHighlightItem(null);
             }
@@ -73,31 +78,31 @@ const Board: React.FC<BoardProps> = ({ data, options }: BoardProps) => {
         }
         setState({ ...state });
         return item.done;
-    }, [state]);
+    }, [state, options]);
 
-    useEffect(() => {
-        if (state.cursor.tick === 0) {
-            const team = state.teamStates[state.cursor.index];
-            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-            const element = document.querySelector<HTMLTableRowElement>(`#team-id-${team.info.id}`)!;
-            const dis = element.getBoundingClientRect().top + window.scrollY;
-            const dur = 10;
-            let count = 0;
-            const frame = () => {
-                window.scrollBy({ left: 0, top: dis / dur / 60, behavior: "auto" });
-                count += 1;
-                if (count < dur * 60) {
-                    window.requestAnimationFrame(frame);
-                } else {
-                    setKeyLock(false);
-                }
-            };
-            setKeyLock(true);
-            setTimeout(() => {
-                window.requestAnimationFrame(frame);
-            }, 2000);
-        }
-    }, [state]);
+    // useEffect(() => {
+    //     if (state.cursor.tick === 0) {
+    //         const team = state.teamStates[state.cursor.index];
+    //         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    //         const element = document.querySelector<HTMLTableRowElement>(`#team-id-${team.info.id}`)!;
+    //         const dis = element.getBoundingClientRect().top + window.scrollY;
+    //         const dur = 10;
+    //         let count = 0;
+    //         const frame = () => {
+    //             window.scrollBy({ left: 0, top: dis / dur / 60, behavior: "auto" });
+    //             count += 1;
+    //             if (count < dur * 60) {
+    //                 window.requestAnimationFrame(frame);
+    //             } else {
+    //                 setKeyLock(false);
+    //             }
+    //         };
+    //         setKeyLock(true);
+    //         setTimeout(() => {
+    //             window.requestAnimationFrame(frame);
+    //         }, 2000);
+    //     }
+    // }, [state]);
 
     const handleKeydown = useCallback((e: KeyboardEvent) => {
         console.log("keydown");
@@ -147,13 +152,14 @@ const Board: React.FC<BoardProps> = ({ data, options }: BoardProps) => {
     }, [state, keyLock, handleNextStep, autoReveal]);
 
     useEffect(() => {
-        if (highlightItem) {
+        if (highlightItem && options.shiningBeforeReveal) {
             const timer = setInterval(() => {
+                console.log("flag", !highlightFlag);
                 setHighlightFlag(!highlightFlag);
             }, 400);
             return () => clearInterval(timer);
         }
-    }, [highlightItem, highlightFlag]);
+    }, [highlightItem, highlightFlag, options]);
 
     return (
         <StickyContainer style={{ width: "100%" }}>

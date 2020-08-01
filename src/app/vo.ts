@@ -125,13 +125,15 @@ export type HighlightItem = {
 export type RevealGen = Generator<HighlightItem | undefined, void, void>;
 
 export function* reveal(state: ContestState): Generator<HighlightItem | undefined, void, void> {
-    let checked = false;
+    let checked = true;
     while (state.cursor.index >= 0) {
         const team = state.teamStates[state.cursor.index];
         const p = team.problemStates.find(p => p.state === ProblemStateKind.Pending);
         if (p) {
-            state.cursor.tick += 1;
-            yield;
+            if (!checked) {
+                state.cursor.tick += 1;
+                yield;
+            }
 
             const isAccepted = p.unrevealedSubmissions.some((s) => s.accepted);
             state.cursor.tick += 1;
@@ -175,4 +177,5 @@ export function* reveal(state: ContestState): Generator<HighlightItem | undefine
 
 export interface BoardOptions {
     autoReveal: boolean;
+    shiningBeforeReveal: boolean;
 }

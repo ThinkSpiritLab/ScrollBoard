@@ -2,7 +2,7 @@ import * as dto from "./dto";
 import * as util from "./util";
 import * as vo from "./vo";
 
-import React, { useState, useRef, useEffect, } from "react";
+import React, { useState, useRef, useEffect, useCallback, } from "react";
 import { Card, Button, Row, Divider, Descriptions, Space, Tag, Col, Form, Switch } from "antd";
 import { UploadOutlined, PlayCircleOutlined } from "@ant-design/icons";
 import * as queryString from "query-string";
@@ -53,6 +53,12 @@ const Loader: React.FC<LoaderProps> = ({ onLoad, onStart }: LoaderProps) => {
     }, [onLoad]);
 
     const [form] = Form.useForm();
+
+    const handleStart = useCallback(() => {
+        const autoReveal = !!form.getFieldValue("autoReveal");
+        const shiningBeforeReveal = !!form.getFieldValue("shiningBeforeReveal");
+        onStart({ autoReveal, shiningBeforeReveal });
+    }, [onStart, form]);
 
     return (
         <Card
@@ -150,8 +156,13 @@ const Loader: React.FC<LoaderProps> = ({ onLoad, onStart }: LoaderProps) => {
                         </Descriptions>
                     </Row>
                     <Row>
-                        <Form form={form}>
+                        <Form form={form} style={{ width: "100%" }} layout="inline"
+                            initialValues={{ autoReveal: false, shiningBeforeReveal: true }}
+                        >
                             <Form.Item name="autoReveal" label="自动运行" valuePropName="checked">
+                                <Switch />
+                            </Form.Item>
+                            <Form.Item name="shiningBeforeReveal" label="题目闪烁动画" valuePropName="checked">
                                 <Switch />
                             </Form.Item>
                         </Form>
@@ -160,7 +171,7 @@ const Loader: React.FC<LoaderProps> = ({ onLoad, onStart }: LoaderProps) => {
                         <Col span={6} style={{ display: "flex", justifyContent: "center" }}>
                             <Button
                                 icon={<PlayCircleOutlined />}
-                                onClick={() => onStart({ autoReveal: !!form.getFieldValue("autoReveal") })}
+                                onClick={handleStart}
                                 style={{ width: "100%" }}
                             >
                                 开始
