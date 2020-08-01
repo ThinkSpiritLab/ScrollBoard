@@ -158,6 +158,7 @@ export function* reveal(state: ContestState): Generator<HighlightItem | undefine
         }
         else {
             if (!checked) {
+                console.log("yield at cursor index = ", state.cursor.index);
                 yield;
             }
             state.cursor.index -= 1;

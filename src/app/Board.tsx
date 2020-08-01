@@ -37,11 +37,10 @@ const Board: React.FC<BoardProps> = ({ data }: BoardProps) => {
 
     const [highlightFlag, setHighlightFlag] = useState<boolean>(false);
 
-    const handleNextStep = useCallback((event: KeyboardEvent) => {
-        event.preventDefault();
-        if (event.key !== "Enter") {
-            return;
-        }
+    const [keyLock, setKeyLock] = useState<boolean>(false);
+
+    const handleNextStep = useCallback(() => {
+        console.log("handleNextStep");
         const prevCursorIdx = state.cursor.index;
         const item = revealGen.current.next();
         if (state.cursor.index !== prevCursorIdx && state.cursor.index >= 0) {
@@ -51,9 +50,17 @@ const Board: React.FC<BoardProps> = ({ data }: BoardProps) => {
             const rect = element.getBoundingClientRect();
             window.scrollTo({ left: 0, top: window.scrollY + rect.top - window.innerHeight / 2, behavior: "smooth" });
         }
+        console.log("cursor index = ", state.cursor.index);
         if (!item.done) {
             if (item.value) {
+                console.log("reveal highlight");
+                setKeyLock(true);
                 setHighlightItem(item.value);
+                setTimeout(() => handleNextStep(), 1200);
+                setTimeout(() => {
+                    handleNextStep();
+                    setKeyLock(false);
+                }, 1500 + (item.value.accepted ? 500 : 0));
             } else {
                 setHighlightItem(null);
             }
@@ -62,7 +69,7 @@ const Board: React.FC<BoardProps> = ({ data }: BoardProps) => {
         }
         setState({ ...state });
         return item.done;
-    }, [state, setState]);
+    }, [state]);
 
     useEffect(() => {
         if (state.cursor.index + 1 === state.teamStates.length) {
@@ -73,20 +80,32 @@ const Board: React.FC<BoardProps> = ({ data }: BoardProps) => {
         }
     }, [state]);
 
+    const handleKeydown = useCallback((e: KeyboardEvent) => {
+        if (keyLock) {
+            return;
+        }
+        console.log("keydown");
+        e.preventDefault();
+        e.stopPropagation();
+        if (e.key === "Enter") {
+            handleNextStep();
+        }
+    }, [handleNextStep, keyLock]);
+
     useEffect(() => {
-        document.addEventListener("keydown", handleNextStep);
-        return () => document.removeEventListener("keydown", handleNextStep);
-        // const timer = setInterval(() => {
-        //     const done = handleNextStep();
-        //     if (done) { clearInterval(timer); }
-        // }, 2500);
-        // return () => clearInterval(timer);
-    }, [handleNextStep]);
+        // document.addEventListener("keydown", handleKeydown);
+        // return () => document.removeEventListener("keydown", handleKeydown);
+        const timer = setInterval(() => {
+            if (keyLock) { return; }
+            const done = handleNextStep();
+            if (done) { clearInterval(timer); }
+        }, 500);
+        return () => clearInterval(timer);
+    }, [handleKeydown, handleNextStep, keyLock]);
 
     useEffect(() => {
         if (highlightItem) {
             const timer = setInterval(() => {
-                console.log("flag", highlightFlag);
                 setHighlightFlag(!highlightFlag);
             }, 400);
             return () => clearInterval(timer);
@@ -111,6 +130,13 @@ const Board: React.FC<BoardProps> = ({ data }: BoardProps) => {
                         <thead>
                             <tr>
                                 <th style={{ width: "5%" }}>
+                                    <span
+                                        style={{
+                                            position: "absolute", zIndex: 2048, top: 0, left: 0,
+                                            borderRadius: "50%", width: "6px", height: "6px",
+                                            backgroundColor: keyLock ? "#ff4d4f" : "#52c41a"
+                                        }}
+                                    />
                                     Rank
                                 </th>
                                 <th style={{ width: "25%" }}>
@@ -150,36 +176,34 @@ const Board: React.FC<BoardProps> = ({ data }: BoardProps) => {
                     </table>
                 )}
             </Sticky>
-            <div
+
+            <FlipMove
                 style={{
                     width: "100%",
+                    overflowAnchor: "none",
+                    fontSize: "2em",
+                    textAlign: "center",
                 }}
+                duration={2000}
             >
-                <table>
-                    <FlipMove typeName="tbody"
-                        style={{
-                            width: "100%",
-                            overflowAnchor: "none",
-                            fontSize: "2em",
-                            textAlign: "center",
-                        }}
-                        duration={2000}
-                    >
 
-                        {state.teamStates.map((team, idx) => {
-                            const isFocused = idx === state.cursor.index;
+                {state.teamStates.map((team, idx) => {
+                    const isFocused = idx === state.cursor.index;
 
-                            return (
-                                <tr
-                                    key={team.team.id}
-                                    id={`team-id-${team.team.id}`}
-                                    style={{
-                                        boxShadow:
-                                            isFocused ?
-                                                "0 5px 12px 4px rgba(0, 0, 0, 0.09), 0 -5px 12px 4px rgba(0, 0, 0, 0.09)"
-                                                : undefined
-                                    }}
-                                >
+                    return (
+                        <table
+                            key={team.team.id}
+                            id={`team-id-${team.team.id}`}
+                            style={{
+                                width: "100%",
+                                boxShadow:
+                                    isFocused ?
+                                        "0 5px 12px 4px rgba(0, 0, 0, 0.09), 0 -5px 12px 4px rgba(0, 0, 0, 0.09)"
+                                        : undefined
+                            }}
+                        >
+                            <tbody>
+                                <tr>
                                     <td style={{ width: "5%" }}>
                                         {team.rank}
                                     </td>
@@ -202,7 +226,6 @@ const Board: React.FC<BoardProps> = ({ data }: BoardProps) => {
                                                     minHeight: "1em",
                                                     borderRadius: "0.25em",
                                                     backgroundColor: cvtColor(p.state),
-                                                    border: isHighlighted ? "1px solid blue" : "1px solid transparent",
                                                     color: "white",
                                                 }}
                                                 ref={isHighlighted ? highlightNodeRef : null}
@@ -233,11 +256,11 @@ const Board: React.FC<BoardProps> = ({ data }: BoardProps) => {
                                         );
                                     })}
                                 </tr>
-                            );
-                        })}
-                    </FlipMove>
-                </table>
-            </div >
+                            </tbody>
+                        </table>
+                    );
+                })}
+            </FlipMove>
         </StickyContainer>
     );
 };
