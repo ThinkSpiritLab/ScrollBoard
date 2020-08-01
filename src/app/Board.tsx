@@ -1,9 +1,12 @@
+import "./Board.css";
+
 import * as dto from "./dto";
 import * as vo from "./vo";
 
 import React, { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import FlipMove from "react-flip-move";
 import { StickyContainer, Sticky } from "react-sticky";
+import { CSSTransition } from "react-transition-group";
 
 function cvtColor(state: vo.ProblemStateKind): string | undefined {
     if (state === vo.ProblemStateKind.Passed) {
@@ -30,7 +33,15 @@ const Board: React.FC<BoardProps> = ({ data }: BoardProps) => {
 
     const revealGen = useRef<vo.RevealGen>(vo.reveal(state));
 
-    const handleNextStep = useCallback(() => {
+    const highlightNodeRef = useRef<HTMLSpanElement | null>(null);
+
+    const [highlightFlag, setHighlightFlag] = useState<boolean>(false);
+
+    const handleNextStep = useCallback((event: KeyboardEvent) => {
+        event.preventDefault();
+        if (event.key !== "Enter") {
+            return;
+        }
         const prevCursorIdx = state.cursor.index;
         const item = revealGen.current.next();
         if (state.cursor.index !== prevCursorIdx && state.cursor.index >= 0) {
@@ -71,6 +82,16 @@ const Board: React.FC<BoardProps> = ({ data }: BoardProps) => {
         // }, 2500);
         // return () => clearInterval(timer);
     }, [handleNextStep]);
+
+    useEffect(() => {
+        if (highlightItem) {
+            const timer = setInterval(() => {
+                console.log("flag", highlightFlag);
+                setHighlightFlag(!highlightFlag);
+            }, 400);
+            return () => clearInterval(timer);
+        }
+    }, [highlightItem, highlightFlag]);
 
     return (
         <StickyContainer style={{ width: "100%" }}>
@@ -134,68 +155,88 @@ const Board: React.FC<BoardProps> = ({ data }: BoardProps) => {
                     width: "100%",
                 }}
             >
-                <FlipMove typeName="table"
-                    style={{
-                        width: "100%",
-                        overflowAnchor: "none",
-                        fontSize: "2em",
-                        textAlign: "center",
-                    }}
-                    duration={2000}
-                >
+                <table>
+                    <FlipMove typeName="tbody"
+                        style={{
+                            width: "100%",
+                            overflowAnchor: "none",
+                            fontSize: "2em",
+                            textAlign: "center",
+                        }}
+                        duration={2000}
+                    >
 
-                    {state.teamStates.map((team, idx) => {
-                        const isFocused = idx === state.cursor.index;
+                        {state.teamStates.map((team, idx) => {
+                            const isFocused = idx === state.cursor.index;
 
-                        return (
-                            <tr
-                                key={team.team.id}
-                                id={`team-id-${team.team.id}`}
-                                style={{
-                                    boxShadow:
-                                        isFocused ?
-                                            "0 5px 12px 4px rgba(0, 0, 0, 0.09), 0 -5px 12px 4px rgba(0, 0, 0, 0.09)"
-                                            : undefined
-                                }}
-                            >
-                                <td style={{ width: "5%" }}>
-                                    {team.rank}
-                                </td>
-                                <td style={{ width: "25%" }}>
-                                    {team.team.name}
-                                </td>
-                                <td style={{ width: "10%" }}>
-                                    {`${team.solved} - ${Math.floor(team.penalty / 60000)}`}
-                                </td>
-                                {team.problemStates.map((p) => {
-                                    const isHighlighted = highlightItem
-                                        && highlightItem.teamId === team.team.id
-                                        && highlightItem.problemId === p.problem.id;
+                            return (
+                                <tr
+                                    key={team.team.id}
+                                    id={`team-id-${team.team.id}`}
+                                    style={{
+                                        boxShadow:
+                                            isFocused ?
+                                                "0 5px 12px 4px rgba(0, 0, 0, 0.09), 0 -5px 12px 4px rgba(0, 0, 0, 0.09)"
+                                                : undefined
+                                    }}
+                                >
+                                    <td style={{ width: "5%" }}>
+                                        {team.rank}
+                                    </td>
+                                    <td style={{ width: "25%" }}>
+                                        {team.team.name}
+                                    </td>
+                                    <td style={{ width: "10%" }}>
+                                        {`${team.solved} - ${Math.floor(team.penalty / 60000)}`}
+                                    </td>
+                                    {team.problemStates.map((p) => {
+                                        const isHighlighted = highlightItem
+                                            && highlightItem.teamId === team.team.id
+                                            && highlightItem.problemId === p.problem.id;
 
-                                    return (
-                                        <td key={p.problem.id} style={{ width: `${60 / team.problemStates.length}%` }}>
-                                            <span style={{
-                                                display: "inline-block",
-                                                minWidth: "4em",
-                                                minHeight: "1em",
-                                                borderRadius: "0.25em",
-                                                backgroundColor: cvtColor(p.state),
-                                                border: isHighlighted ? "1px solid blue" : "1px solid transparent",
-                                                color: "white",
-                                            }} >
+                                        const grid = (
+                                            <span
+                                                style={{
+                                                    display: "inline-block",
+                                                    minWidth: "4em",
+                                                    minHeight: "1em",
+                                                    borderRadius: "0.25em",
+                                                    backgroundColor: cvtColor(p.state),
+                                                    border: isHighlighted ? "1px solid blue" : "1px solid transparent",
+                                                    color: "white",
+                                                }}
+                                                ref={isHighlighted ? highlightNodeRef : null}
+                                            >
                                                 {p.state === vo.ProblemStateKind.Passed ?
                                                     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
                                                     `${p.tryCount} - ${Math.floor(p.acceptTime! / 60000)}`
                                                     : `${p.tryCount}`
                                                 }
                                             </span>
-                                        </td>
-                                    );
-                                })}
-                            </tr>
-                        );
-                    })}
-                </FlipMove>
+                                        );
+
+                                        const wrappedGrid = isHighlighted ? (
+                                            <CSSTransition
+                                                in={highlightFlag}
+                                                timeout={400}
+                                                classNames="problem-grid"
+                                                nodeRef={highlightNodeRef}
+                                            >
+                                                {grid}
+                                            </CSSTransition>
+                                        ) : grid;
+
+                                        return (
+                                            <td key={p.problem.id} style={{ width: `${60 / team.problemStates.length}%` }}>
+                                                {wrappedGrid}
+                                            </td>
+                                        );
+                                    })}
+                                </tr>
+                            );
+                        })}
+                    </FlipMove>
+                </table>
             </div >
         </StickyContainer>
     );

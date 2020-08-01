@@ -1,0 +1,14 @@
+.problem-grid-enter{ 
+    opacity: 1;
+}
+.problem-grid-enter-active{
+    opacity: 0;
+    transition: opacity 400ms;
+}
+.problem-grid-exit{
+    opacity: 0;
+}
+.problem-grid-exit-active{
+    opacity: 1;
+    transition: opacity 400ms;
+}
