@@ -27,7 +27,7 @@ export enum ProblemStateKind {
 export interface ContestState {
     teamStates: TeamState[]
     contest: dto.Contest;
-    cursor: { index: number };
+    cursor: { index: number, tick: number };
 }
 
 export function calcContestState(data: dto.Contest): ContestState {
@@ -84,7 +84,7 @@ export function calcContestState(data: dto.Contest): ContestState {
     });
 
     const teamStates = Array.from(teamMap.entries()).map((e) => e[1]);
-    const state = { teamStates, contest: data, cursor: { index: teamStates.length - 1 } };
+    const state = { teamStates, contest: data, cursor: { index: teamStates.length - 1, tick: 0 } };
     calcRankInplace(state);
     return state;
 }
@@ -131,6 +131,7 @@ export function* reveal(state: ContestState): Generator<HighlightItem | undefine
         const p = team.problemStates.find(p => p.state === ProblemStateKind.Pending);
         if (p) {
             const isAccepted = p.unrevealedSubmissions.some((s) => s.accepted);
+            state.cursor.tick += 1;
             yield {
                 teamId: team.team.id,
                 problemId: p.problem.id,
@@ -153,16 +154,22 @@ export function* reveal(state: ContestState): Generator<HighlightItem | undefine
             calcRankInplace(state);
             const curRank = team.rank;
             console.log(`team "${team.team.name.padEnd(30, " ")}" rank ${prevRank} -> ${curRank}`);
+            state.cursor.tick += 1;
             yield;
             checked = true;
         }
         else {
             if (!checked) {
                 console.log("yield at cursor index = ", state.cursor.index);
+                state.cursor.tick += 1;
                 yield;
             }
             state.cursor.index -= 1;
             checked = false;
         }
     }
+}
+
+export interface BoardOptions {
+    autoReveal: boolean;
 }

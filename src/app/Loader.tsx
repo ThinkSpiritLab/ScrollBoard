@@ -1,13 +1,14 @@
 import * as dto from "./dto";
 import * as util from "./util";
+import * as vo from "./vo";
 
 import React, { useState, useRef, } from "react";
-import { Card, Button, Row, Divider, Descriptions, Space, Tag, Col } from "antd";
+import { Card, Button, Row, Divider, Descriptions, Space, Tag, Col, Form, Switch } from "antd";
 import { UploadOutlined, PlayCircleOutlined } from "@ant-design/icons";
 
 export interface LoaderProps {
     onLoad: (data: dto.Contest) => void;
-    onStart: () => void;
+    onStart: (options: vo.BoardOptions) => void;
 }
 
 const Loader: React.FC<LoaderProps> = ({ onLoad, onStart }: LoaderProps) => {
@@ -27,6 +28,8 @@ const Loader: React.FC<LoaderProps> = ({ onLoad, onStart }: LoaderProps) => {
         }
     };
 
+    const [form] = Form.useForm();
+
     return (
         <Card
             style={{
@@ -42,9 +45,11 @@ const Loader: React.FC<LoaderProps> = ({ onLoad, onStart }: LoaderProps) => {
                 onChange={handleLoad}
             />
             <Row justify="center" style={{ alignItems: "baseline" }}>
-                <span style={{ flexGrow: 1, textAlign: "center", margin: "0 1em" }}>
-                    {file?.name}
-                </span>
+                {file ? (
+                    <span style={{ flexGrow: 1, textAlign: "center", margin: "0 1em" }}>
+                        {file?.name}
+                    </span>
+                ) : null}
                 <Button
                     icon={<UploadOutlined />}
                     onClick={(): void => fileInputRef.current?.click()}
@@ -120,11 +125,18 @@ const Loader: React.FC<LoaderProps> = ({ onLoad, onStart }: LoaderProps) => {
                             </Descriptions.Item>
                         </Descriptions>
                     </Row>
+                    <Row>
+                        <Form form={form}>
+                            <Form.Item name="autoReveal" label="自动运行" valuePropName="checked">
+                                <Switch />
+                            </Form.Item>
+                        </Form>
+                    </Row>
                     <Row justify="center">
                         <Col span={6} style={{ display: "flex", justifyContent: "center" }}>
                             <Button
                                 icon={<PlayCircleOutlined />}
-                                onClick={onStart}
+                                onClick={() => onStart({ autoReveal: !!form.getFieldValue("autoReveal") })}
                                 style={{ width: "100%" }}
                             >
                                 开始

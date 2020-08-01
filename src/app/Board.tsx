@@ -23,9 +23,10 @@ function cvtColor(state: vo.ProblemStateKind): string | undefined {
 
 interface BoardProps {
     data: dto.Contest;
+    options: vo.BoardOptions;
 }
 
-const Board: React.FC<BoardProps> = ({ data }: BoardProps) => {
+const Board: React.FC<BoardProps> = ({ data, options }: BoardProps) => {
 
     const [state, setState] = useState<vo.ContestState>(useMemo(() => vo.calcContestState(data), [data]));
 
@@ -60,6 +61,7 @@ const Board: React.FC<BoardProps> = ({ data }: BoardProps) => {
                 setTimeout(() => {
                     handleNextStep();
                     setKeyLock(false);
+                    console.log("unlocked");
                 }, 1500 + (item.value.accepted ? 500 : 0));
             } else {
                 setHighlightItem(null);
@@ -72,11 +74,26 @@ const Board: React.FC<BoardProps> = ({ data }: BoardProps) => {
     }, [state]);
 
     useEffect(() => {
-        if (state.cursor.index + 1 === state.teamStates.length) {
+        if (state.cursor.tick === 0) {
             const team = state.teamStates[state.cursor.index];
             // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             const element = document.querySelector<HTMLTableRowElement>(`#team-id-${team.team.id}`)!;
-            element.scrollIntoView({ behavior: "smooth" });
+            const dis = element.getBoundingClientRect().top + window.scrollY;
+            const dur = 10;
+            let count = 0;
+            const frame = () => {
+                window.scrollBy({ left: 0, top: dis / dur / 60, behavior: "auto" });
+                count += 1;
+                if (count < dur * 60) {
+                    window.requestAnimationFrame(frame);
+                } else {
+                    setKeyLock(false);
+                }
+            };
+            setKeyLock(true);
+            setTimeout(() => {
+                window.requestAnimationFrame(frame);
+            }, 2000);
         }
     }, [state]);
 
@@ -93,15 +110,21 @@ const Board: React.FC<BoardProps> = ({ data }: BoardProps) => {
     }, [handleNextStep, keyLock]);
 
     useEffect(() => {
-        // document.addEventListener("keydown", handleKeydown);
-        // return () => document.removeEventListener("keydown", handleKeydown);
-        const timer = setInterval(() => {
-            if (keyLock) { return; }
-            const done = handleNextStep();
-            if (done) { clearInterval(timer); }
-        }, 500);
-        return () => clearInterval(timer);
-    }, [handleKeydown, handleNextStep, keyLock]);
+        document.addEventListener("keydown", handleKeydown);
+        return () => document.removeEventListener("keydown", handleKeydown);
+
+    }, [handleKeydown]);
+
+    useEffect(() => {
+        if (state.cursor.tick !== 0 && options.autoReveal) {
+            const timer = setInterval(() => {
+                if (keyLock) { return; }
+                const done = handleNextStep();
+                if (done) { clearInterval(timer); }
+            }, 500);
+            return () => clearInterval(timer);
+        }
+    }, [state, keyLock, handleNextStep, options]);
 
     useEffect(() => {
         if (highlightItem) {
