@@ -2,17 +2,27 @@ import * as dto from "./dto";
 import * as util from "./util";
 import * as vo from "./vo";
 
-import React, { useState, useRef, } from "react";
+import React, { useState, useRef, useEffect, } from "react";
 import { Card, Button, Row, Divider, Descriptions, Space, Tag, Col, Form, Switch } from "antd";
 import { UploadOutlined, PlayCircleOutlined } from "@ant-design/icons";
+import * as queryString from "query-string";
 
 export interface LoaderProps {
     onLoad: (data: dto.Contest) => void;
     onStart: (options: vo.BoardOptions) => void;
 }
 
+function getRemoteFileUrl(): string | undefined {
+    const value = queryString.parse(window.location.search)["data-url"];
+    if (typeof value === "string") {
+        return value;
+    } else {
+        return undefined;
+    }
+}
+
 const Loader: React.FC<LoaderProps> = ({ onLoad, onStart }: LoaderProps) => {
-    const [file, setFile] = useState<File | null>();
+    const [fileName, setFileName] = useState<string | null>();
     const fileInputRef = useRef<HTMLInputElement | null>(null);
 
     const [data, setData] = useState<dto.Contest | null>(null);
@@ -20,13 +30,27 @@ const Loader: React.FC<LoaderProps> = ({ onLoad, onStart }: LoaderProps) => {
     const handleLoad = async (e: React.ChangeEvent<HTMLInputElement>): Promise<void> => {
         const file = e.currentTarget.files?.item(0);
         if (file) {
-            setFile(file);
             const content = await util.readFile(file);
             const data = JSON.parse(content) as unknown as dto.Contest; // FIXME: validate
+            setFileName(file.name);
             setData(data);
             onLoad(data);
         }
     };
+
+    useEffect(() => {
+        const loadRemote = async (): Promise<void> => {
+            const remoteFileUrl: string | undefined = getRemoteFileUrl();
+            if (remoteFileUrl) {
+                const resp = await fetch(remoteFileUrl);
+                const data = await resp.json() as unknown as dto.Contest; // FIXME: validate
+                setFileName(remoteFileUrl);
+                setData(data);
+                onLoad(data);
+            }
+        };
+        loadRemote().catch(err => console.error(err));
+    }, [onLoad]);
 
     const [form] = Form.useForm();
 
@@ -45,9 +69,9 @@ const Loader: React.FC<LoaderProps> = ({ onLoad, onStart }: LoaderProps) => {
                 onChange={handleLoad}
             />
             <Row justify="center" style={{ alignItems: "baseline" }}>
-                {file ? (
+                {(fileName) ? (
                     <span style={{ flexGrow: 1, textAlign: "center", margin: "0 1em" }}>
-                        {file?.name}
+                        {fileName}
                     </span>
                 ) : null}
                 <Button

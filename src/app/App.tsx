@@ -18,7 +18,8 @@ const App: React.FC = () => {
     const handleStart = useCallback((options) => {
         setRunning(true);
         setOptions(options);
-    }, []);
+        console.debug(data, options);
+    }, [data]);
 
     return (
         <>
