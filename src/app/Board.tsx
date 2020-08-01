@@ -49,7 +49,7 @@ const Board: React.FC<BoardProps> = ({ data, options }: BoardProps) => {
         if (state.cursor.index !== prevCursorIdx && state.cursor.index >= 0) {
             const team = state.teamStates[state.cursor.index];
             // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-            const element = document.querySelector<HTMLTableRowElement>(`#team-id-${team.team.id}`)!;
+            const element = document.querySelector<HTMLTableRowElement>(`#team-id-${team.info.id}`)!;
             const rect = element.getBoundingClientRect();
             window.scrollTo({ left: 0, top: window.scrollY + rect.top - window.innerHeight / 2, behavior: "smooth" });
         }
@@ -79,7 +79,7 @@ const Board: React.FC<BoardProps> = ({ data, options }: BoardProps) => {
         if (state.cursor.tick === 0) {
             const team = state.teamStates[state.cursor.index];
             // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-            const element = document.querySelector<HTMLTableRowElement>(`#team-id-${team.team.id}`)!;
+            const element = document.querySelector<HTMLTableRowElement>(`#team-id-${team.info.id}`)!;
             const dis = element.getBoundingClientRect().top + window.scrollY;
             const dur = 10;
             let count = 0;
@@ -235,8 +235,8 @@ const Board: React.FC<BoardProps> = ({ data, options }: BoardProps) => {
 
                     return (
                         <table
-                            key={team.team.id}
-                            id={`team-id-${team.team.id}`}
+                            key={team.info.id}
+                            id={`team-id-${team.info.id}`}
                             style={{
                                 width: "100%",
                                 boxShadow:
@@ -251,15 +251,15 @@ const Board: React.FC<BoardProps> = ({ data, options }: BoardProps) => {
                                         {team.rank}
                                     </td>
                                     <td style={{ width: "25%" }}>
-                                        {team.team.name}
+                                        {team.info.name}
                                     </td>
                                     <td style={{ width: "10%" }}>
                                         {`${team.solved} - ${Math.floor(team.penalty / 60000)}`}
                                     </td>
                                     {team.problemStates.map((p) => {
                                         const isHighlighted = highlightItem
-                                            && highlightItem.teamId === team.team.id
-                                            && highlightItem.problemId === p.problem.id;
+                                            && highlightItem.teamId === team.info.id
+                                            && highlightItem.problemId === p.info.id;
 
                                         const grid = (
                                             <span
@@ -293,7 +293,7 @@ const Board: React.FC<BoardProps> = ({ data, options }: BoardProps) => {
                                         ) : grid;
 
                                         return (
-                                            <td key={p.problem.id} style={{ width: `${60 / team.problemStates.length}%` }}>
+                                            <td key={p.info.id} style={{ width: `${60 / team.problemStates.length}%` }}>
                                                 {wrappedGrid}
                                             </td>
                                         );

@@ -1,7 +1,7 @@
 import * as dto from "./dto";
 
 export interface TeamState {
-    team: dto.Team;
+    info: dto.Team;
     rank: number;
     solved: number;
     penalty: number;
@@ -9,7 +9,7 @@ export interface TeamState {
 }
 
 export interface ProblemState {
-    problem: dto.Problem;
+    info: dto.Problem;
     revealedSubmissions: dto.Submission[];
     unrevealedSubmissions: dto.Submission[];
     state: ProblemStateKind;
@@ -26,7 +26,7 @@ export enum ProblemStateKind {
 
 export interface ContestState {
     teamStates: TeamState[]
-    contest: dto.Contest;
+    info: dto.Contest;
     cursor: { index: number, tick: number };
 }
 
@@ -36,12 +36,12 @@ export function calcContestState(data: dto.Contest): ContestState {
         teamMap.set(
             contestant.id,
             {
-                team: contestant,
+                info: contestant,
                 rank: 0,
                 solved: 0,
                 penalty: 0,
                 problemStates: data.problems.map(problem => ({
-                    problem,
+                    info: problem,
                     revealedSubmissions: [],
                     unrevealedSubmissions: [],
                     state: ProblemStateKind.Untouched,
@@ -58,7 +58,7 @@ export function calcContestState(data: dto.Contest): ContestState {
         if (!team) {
             throw new Error("invalid data");
         }
-        const p = team.problemStates.find(p => p.problem.id === submission.problemId);
+        const p = team.problemStates.find(p => p.info.id === submission.problemId);
         if (!p) {
             throw new Error("invalid data");
         }
@@ -84,7 +84,7 @@ export function calcContestState(data: dto.Contest): ContestState {
     });
 
     const teamStates = Array.from(teamMap.entries()).map((e) => e[1]);
-    const state = { teamStates, contest: data, cursor: { index: teamStates.length - 1, tick: 0 } };
+    const state = { teamStates, info: data, cursor: { index: teamStates.length - 1, tick: 0 } };
     calcRankInplace(state);
     return state;
 }
@@ -97,8 +97,8 @@ export function calcRankInplace(state: ContestState): void {
         if (lhs.penalty !== rhs.penalty) {
             return (lhs.penalty - rhs.penalty);
         }
-        if (lhs.team.name !== rhs.team.name) {
-            return lhs.team.name < rhs.team.name ? (-1) : (1);
+        if (lhs.info.name !== rhs.info.name) {
+            return lhs.info.name < rhs.info.name ? (-1) : (1);
         }
         return 0;
     });
@@ -130,14 +130,14 @@ export function* reveal(state: ContestState): Generator<HighlightItem | undefine
         const team = state.teamStates[state.cursor.index];
         const p = team.problemStates.find(p => p.state === ProblemStateKind.Pending);
         if (p) {
-            state.cursor.tick+=1;
+            state.cursor.tick += 1;
             yield;
 
             const isAccepted = p.unrevealedSubmissions.some((s) => s.accepted);
             state.cursor.tick += 1;
             yield {
-                teamId: team.team.id,
-                problemId: p.problem.id,
+                teamId: team.info.id,
+                problemId: p.info.id,
                 accepted: isAccepted
             };
             if (isAccepted) {
@@ -146,7 +146,7 @@ export function* reveal(state: ContestState): Generator<HighlightItem | undefine
                 p.tryCount = p.tryCount - p.unrevealedSubmissions.length + idx + 1;
                 p.acceptTime = p.unrevealedSubmissions[idx].submitTime;
                 team.solved += 1;
-                team.penalty += Math.floor(p.acceptTime / 60000) * 60000 + state.contest.penaltyTime * (p.tryCount - 1);
+                team.penalty += Math.floor(p.acceptTime / 60000) * 60000 + state.info.penaltyTime * (p.tryCount - 1);
             } else {
                 p.state = ProblemStateKind.Failed;
             }
@@ -156,7 +156,7 @@ export function* reveal(state: ContestState): Generator<HighlightItem | undefine
             const prevRank = team.rank;
             calcRankInplace(state);
             const curRank = team.rank;
-            console.log(`team "${team.team.name.padEnd(30, " ")}" rank ${prevRank} -> ${curRank}`);
+            console.log(`team "${team.info.name}" rank ${prevRank} -> ${curRank}`);
             state.cursor.tick += 1;
             yield;
             checked = true;
