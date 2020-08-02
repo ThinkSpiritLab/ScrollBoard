@@ -43,7 +43,7 @@ const Board: React.FC<BoardProps> = ({ data, options }: BoardProps) => {
     const [speedFactor, setSpeedFactor] = useState<number>(options.speedFactor);
 
     const handleNextStep = useCallback(() => {
-        console.log("handleNextStep");
+        console.log(new Date().getTime(), "handleNextStep");
         const prevCursorIdx = state.cursor.index;
         const item = revealGen.current.next();
         if (state.cursor.index !== prevCursorIdx && state.cursor.index >= 0) {
@@ -63,12 +63,15 @@ const Board: React.FC<BoardProps> = ({ data, options }: BoardProps) => {
                     console.log("locked");
                     setHighlightItem(value);
 
-                    let delay = options.shiningBeforeReveal ? 1200 : 400;
-                    await util.delay(delay / speedFactor);
+                    let delay;
+                    delay = options.shiningBeforeReveal ? 1200 : (autoReveal ? 400 : 0);
+                    console.log("delay", delay / speedFactor);
+                    await util.delay(delay / speedFactor);  // wait for shining
                     handleNextStep();
 
-                    delay = value.accepted ? 800 : 300;
-                    await util.delay(delay / speedFactor);
+                    delay = autoReveal ? (value.accepted ? 800 : 300) : (0);
+                    console.log("delay", delay / speedFactor);
+                    await util.delay(delay / speedFactor); // wait for showing result
                     handleNextStep();
 
                     setKeyLock(false);
@@ -82,7 +85,7 @@ const Board: React.FC<BoardProps> = ({ data, options }: BoardProps) => {
         }
         setState({ ...state });
         return item.done;
-    }, [state, speedFactor, options.shiningBeforeReveal]);
+    }, [state, speedFactor, options.shiningBeforeReveal, autoReveal]);
 
     // useEffect(() => {
     //     if (state.cursor.tick === 0) {
@@ -120,6 +123,9 @@ const Board: React.FC<BoardProps> = ({ data, options }: BoardProps) => {
     const handleKeydown = useCallback((e: KeyboardEvent) => {
         console.log("keydown", e.key);
         if (e.key === "Enter") {
+            if (state.cursor.index < 0) {
+                return;
+            }
             if (keyLock) {
                 return;
             }
@@ -147,7 +153,7 @@ const Board: React.FC<BoardProps> = ({ data, options }: BoardProps) => {
             setSpeedFactor(s);
             console.log("speedFactor", s);
         }
-    }, [handleNextStep, keyLock, speedFactor]);
+    }, [handleNextStep, keyLock, speedFactor, state.cursor]);
 
     useEffect(() => {
         document.addEventListener("keydown", handleKeydown);
@@ -155,10 +161,13 @@ const Board: React.FC<BoardProps> = ({ data, options }: BoardProps) => {
     }, [handleKeydown]);
 
     const handleClick = useCallback(() => {
+        if (state.cursor.index < 0) {
+            return;
+        }
         if (keyLock) { return; }
         console.log("click");
         handleNextStep();
-    }, [handleNextStep, keyLock]);
+    }, [handleNextStep, keyLock, state.cursor]);
 
     useEffect(() => {
         document.addEventListener("click", handleClick);
@@ -273,6 +282,7 @@ const Board: React.FC<BoardProps> = ({ data, options }: BoardProps) => {
                             id={`team-id-${team.info.id}`}
                             style={{
                                 width: "100%",
+                                border: isFocused ? "none" : "1px solid #f0f0f0",
                                 boxShadow:
                                     isFocused ?
                                         "0 5px 12px 4px rgba(0, 0, 0, 0.09), 0 -5px 12px 4px rgba(0, 0, 0, 0.09)"
