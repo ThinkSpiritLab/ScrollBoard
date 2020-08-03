@@ -6,6 +6,7 @@ import React, { useState, useEffect, useCallback, useRef, useMemo, CSSProperties
 import FlipMove from "react-flip-move";
 import { StickyContainer, Sticky } from "react-sticky";
 import { Transition } from "react-transition-group";
+import { Tooltip } from "antd";
 
 function cvtColor(state: vo.ProblemStateKind): string | undefined {
     if (state === vo.ProblemStateKind.Passed) {
@@ -198,6 +199,14 @@ const Board: React.FC<BoardProps> = ({ data, options }: BoardProps) => {
         }
     }, [highlightItem, options, speedFactor]);
 
+    const [windowWidth, setWindowWidth] = useState<number>(window.innerWidth);
+
+    useEffect(() => {
+        const handleResize = () => setWindowWidth(window.innerWidth);
+        window.onresize = handleResize;
+        return () => { window.onresize = null; };
+    }, []);
+
     return (
         <StickyContainer style={{ width: "100%" }}>
             <Sticky>
@@ -225,7 +234,7 @@ const Board: React.FC<BoardProps> = ({ data, options }: BoardProps) => {
                                     />
                                     Rank
                                 </th>
-                                <th style={{ width: "25%" }}>
+                                <th style={{ width: "20%" }}>
                                     Team
                                 </th>
                                 <th style={{ width: "10%" }}>
@@ -235,7 +244,7 @@ const Board: React.FC<BoardProps> = ({ data, options }: BoardProps) => {
                                     <th
                                         key={p.id}
                                         style={{
-                                            width: `${60 / data.problems.length}%`,
+                                            width: `${65 / data.problems.length}%`,
                                         }}
                                     >
                                         <span
@@ -294,9 +303,19 @@ const Board: React.FC<BoardProps> = ({ data, options }: BoardProps) => {
                                     <td style={{ width: "5%" }}>
                                         {team.rank}
                                     </td>
-                                    <td style={{ width: "25%" }}>
-                                        {team.info.name}
-                                    </td>
+                                    <Tooltip title={team.info.name}>
+                                        <td
+                                            style={{
+                                                maxWidth: `${windowWidth * 0.20}px`,
+                                                width: "20%",
+                                                whiteSpace: "nowrap",
+                                                overflow: "hidden",
+                                                textOverflow: "ellipsis"
+                                            }}
+                                        >
+                                            {team.info.name}
+                                        </td>
+                                    </Tooltip>
                                     <td style={{ width: "10%" }}>
                                         {`${team.solved} - ${Math.floor(team.penalty / 60000)}`}
                                     </td>
@@ -317,7 +336,8 @@ const Board: React.FC<BoardProps> = ({ data, options }: BoardProps) => {
                                             <span
                                                 style={{
                                                     display: "inline-block",
-                                                    minWidth: "4em",
+                                                    maxWidth: "4em",
+                                                    width: "100%",
                                                     minHeight: "1em",
                                                     borderRadius: "0.25em",
                                                     backgroundColor: cvtColor(p.state),
@@ -351,7 +371,7 @@ const Board: React.FC<BoardProps> = ({ data, options }: BoardProps) => {
                                         ) : grid({});
 
                                         return (
-                                            <td key={p.info.id} style={{ width: `${60 / team.problemStates.length}%` }}>
+                                            <td key={p.info.id} style={{ width: `${65 / team.problemStates.length}%` }}>
                                                 {wrappedGrid}
                                             </td>
                                         );
