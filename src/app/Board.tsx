@@ -305,6 +305,12 @@ const Board: React.FC<BoardProps> = ({ data, options }: BoardProps) => {
                                             && highlightItem.teamId === team.info.id
                                             && highlightItem.problemId === p.info.id;
 
+                                        const text = p.state === vo.ProblemStateKind.Untouched ? (undefined) : (
+                                            p.state === vo.ProblemStateKind.Passed ?
+                                                `${p.tryCount} - ${Math.floor((p.acceptTime ?? 0) / 60000)}`
+                                                : `${p.tryCount}`
+                                        );
+
                                         const grid = (style: CSSProperties) => (
                                             <span
                                                 style={{
@@ -320,11 +326,7 @@ const Board: React.FC<BoardProps> = ({ data, options }: BoardProps) => {
                                                 }}
                                                 ref={isHighlighted ? highlightNodeRef : null}
                                             >
-                                                {p.state === vo.ProblemStateKind.Passed ?
-                                                    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                                                    `${p.tryCount} - ${Math.floor(p.acceptTime! / 60000)}`
-                                                    : `${p.tryCount}`
-                                                }
+                                                {text}
                                             </span>
                                         );
 
