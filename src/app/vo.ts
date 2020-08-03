@@ -27,7 +27,11 @@ export enum ProblemStateKind {
 export interface ContestState {
     teamStates: TeamState[]
     info: dto.Contest;
-    cursor: { index: number, tick: number };
+    cursor: { 
+        index: number, 
+        tick: number, 
+        focus: number 
+    };
 }
 
 export function calcContestState(data: dto.Contest): ContestState {
@@ -84,7 +88,15 @@ export function calcContestState(data: dto.Contest): ContestState {
     });
 
     const teamStates = Array.from(teamMap.entries()).map((e) => e[1]);
-    const state = { teamStates, info: data, cursor: { index: teamStates.length - 1, tick: 0 } };
+    const state = {
+        teamStates,
+        info: data,
+        cursor: {
+            index: teamStates.length - 1,
+            tick: 0,
+            focus: teamStates.length - 1
+        }
+    };
     calcRankInplace(state);
     return state;
 }
@@ -127,6 +139,7 @@ export type RevealGen = Generator<HighlightItem | undefined, void, void>;
 export function* reveal(state: ContestState): Generator<HighlightItem | undefined, void, void> {
     let checked = true;
     while (state.cursor.index >= 0) {
+        state.cursor.focus = state.cursor.index;
         const team = state.teamStates[state.cursor.index];
         const p = team.problemStates.find(p => p.state === ProblemStateKind.Pending);
         if (p) {
@@ -159,6 +172,7 @@ export function* reveal(state: ContestState): Generator<HighlightItem | undefine
             calcRankInplace(state);
             const curRank = team.rank;
             console.log(`team "${team.info.name}" rank ${prevRank} -> ${curRank}`);
+            state.cursor.focus = state.teamStates.findIndex(t => Object.is(t, team));
             state.cursor.tick += 1;
             yield;
             checked = true;
@@ -173,6 +187,7 @@ export function* reveal(state: ContestState): Generator<HighlightItem | undefine
             checked = false;
         }
     }
+    state.cursor.focus = -1;
 }
 
 export interface BoardOptions {

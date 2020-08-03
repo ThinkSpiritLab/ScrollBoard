@@ -1,3 +1,5 @@
+import "./Board.css";
+
 import * as dto from "./dto";
 import * as vo from "./vo";
 import * as util from "./util";
@@ -43,10 +45,13 @@ const Board: React.FC<BoardProps> = ({ data, options }: BoardProps) => {
     const [autoReveal, setAutoReveal] = useState<boolean>(options.autoReveal);
     const [speedFactor, setSpeedFactor] = useState<number>(options.speedFactor);
 
+    const [focusIndex, setFocusIndex] = useState<number>(state.cursor.focus);
+
     const handleNextStep = useCallback(() => {
         console.log(new Date().getTime(), "handleNextStep");
         const prevCursorIdx = state.cursor.index;
         const item = revealGen.current.next();
+        setFocusIndex(state.cursor.focus);
         if (state.cursor.index !== prevCursorIdx && state.cursor.index >= 0) {
             const team = state.teamStates[state.cursor.index];
             // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -73,7 +78,17 @@ const Board: React.FC<BoardProps> = ({ data, options }: BoardProps) => {
                     delay = autoReveal ? (value.accepted ? 800 : 300) : (0);
                     console.log("delay", delay / speedFactor);
                     await util.delay(delay / speedFactor); // wait for showing result
+
+                    const team = state.teamStates.find(t => t.info.id === value.teamId);
+                    const prevRank = team?.rank;
                     handleNextStep();
+                    const curRank = team?.rank;
+
+                    if (prevRank !== curRank) {
+                        delay = 2000;
+                        console.log("delay", delay / speedFactor);
+                        await util.delay(delay / speedFactor); // wait for moving up
+                    }
 
                     setKeyLock(false);
                     console.log("unlocked");
@@ -207,6 +222,10 @@ const Board: React.FC<BoardProps> = ({ data, options }: BoardProps) => {
         return () => { window.onresize = null; };
     }, []);
 
+    const handleMovingFinished = useCallback(() => {
+        setFocusIndex(state.cursor.index);
+    }, [state.cursor]);
+
     return (
         <StickyContainer style={{ width: "100%" }}>
             <Sticky>
@@ -280,23 +299,17 @@ const Board: React.FC<BoardProps> = ({ data, options }: BoardProps) => {
                     textAlign: "center",
                 }}
                 duration={2000 / speedFactor}
+                onFinish={handleMovingFinished}
             >
 
                 {state.teamStates.map((team, idx) => {
-                    const isFocused = idx === state.cursor.index;
+                    const isFocused = idx === focusIndex;
 
                     return (
                         <table
                             key={team.info.id}
                             id={`team-id-${team.info.id}`}
-                            style={{
-                                width: "100%",
-                                border: isFocused ? "none" : "1px solid #f0f0f0",
-                                boxShadow:
-                                    isFocused ?
-                                        "0 5px 12px 4px rgba(0, 0, 0, 0.09), 0 -5px 12px 4px rgba(0, 0, 0, 0.09)"
-                                        : undefined
-                            }}
+                            className={(isFocused ? "focused-team" : "team")}
                         >
                             <tbody>
                                 <tr>
