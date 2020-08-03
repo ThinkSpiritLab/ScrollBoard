@@ -193,10 +193,10 @@ const Board: React.FC<BoardProps> = ({ data, options }: BoardProps) => {
                     console.log("flag", !f);
                     return !f;
                 });
-            }, 400);
+            }, 400 / speedFactor);
             return () => clearInterval(timer);
         }
-    }, [highlightItem, options]);
+    }, [highlightItem, options, speedFactor]);
 
     return (
         <StickyContainer style={{ width: "100%" }}>
@@ -311,6 +311,8 @@ const Board: React.FC<BoardProps> = ({ data, options }: BoardProps) => {
                                                 : `${p.tryCount}`
                                         );
 
+                                        const duration = 400 / speedFactor;
+
                                         const grid = (style: CSSProperties) => (
                                             <span
                                                 style={{
@@ -330,7 +332,6 @@ const Board: React.FC<BoardProps> = ({ data, options }: BoardProps) => {
                                             </span>
                                         );
 
-                                        const duration = 400 / speedFactor;
                                         const transitionStyles = {
                                             entering: { opacity: 0 },
                                             entered: { opacity: 0 },
