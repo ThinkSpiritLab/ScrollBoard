@@ -297,6 +297,7 @@ const Board: React.FC<BoardProps> = ({ data, options }: BoardProps) => {
                     overflowAnchor: "none",
                     fontSize: "2em",
                     textAlign: "center",
+                    transformStyle: "preserve-3d"
                 }}
                 duration={2000 / speedFactor}
                 onFinish={handleMovingFinished}
@@ -310,9 +311,15 @@ const Board: React.FC<BoardProps> = ({ data, options }: BoardProps) => {
                             key={team.info.id}
                             id={`team-id-${team.info.id}`}
                             className={(isFocused ? "focused-team" : "team")}
+                            style={{ transformStyle: "preserve-3d" }}
                         >
                             <tbody>
-                                <tr>
+                                <tr
+                                    style={{
+                                        transform: isFocused ? "perspective(65535px) translateZ(1px)" : undefined,
+                                        backgroundColor: isFocused ? "white" : undefined
+                                    }}
+                                >
                                     <td style={{ width: "5%" }}>
                                         {team.rank}
                                     </td>
