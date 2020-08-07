@@ -6,6 +6,11 @@ export interface Contest {
     penaltyTime: number;
     freezeTime: number;
     name: string;
+    medal?: {
+        gold: number;
+        silver: number;
+        bronze: number;
+    }
 }
 
 export interface Problem {

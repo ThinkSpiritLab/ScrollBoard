@@ -6,9 +6,9 @@
 
 .focused-team{
     width: 100%;
+    position: relative;
     z-index: 512;
     border: 1px solid transparent;
-    background-color: white;
     box-shadow: 0 5px 12px 4px rgba(0, 0, 0, 0.09), 0 -5px 12px 4px rgba(0, 0, 0, 0.09);
     transition: box-shadow 0.2s ease-out;
 }

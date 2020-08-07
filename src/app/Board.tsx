@@ -306,6 +306,20 @@ const Board: React.FC<BoardProps> = ({ data, options }: BoardProps) => {
                 {state.teamStates.map((team, idx) => {
                     const isFocused = idx === focusIndex;
 
+                    let backgroundColor = "white";
+                    if (state.info.medal && options.showMedal) {
+                        const goldLine = state.info.medal.gold;
+                        const silverLine = goldLine + state.info.medal.silver;
+                        const bronzeLine = silverLine + state.info.medal.bronze;
+                        if (idx < goldLine) {
+                            backgroundColor = "#fff9c0";
+                        } else if (idx < silverLine) {
+                            backgroundColor = "#f6f6f6";
+                        } else if (idx < bronzeLine) {
+                            backgroundColor = "#eddccf";
+                        }
+                    }
+
                     return (
                         <table
                             key={team.info.id}
@@ -317,7 +331,7 @@ const Board: React.FC<BoardProps> = ({ data, options }: BoardProps) => {
                                 <tr
                                     style={{
                                         transform: isFocused ? "perspective(65535px) translateZ(1px)" : undefined,
-                                        backgroundColor: isFocused ? "white" : undefined
+                                        backgroundColor
                                     }}
                                 >
                                     <td style={{ width: "5%" }}>

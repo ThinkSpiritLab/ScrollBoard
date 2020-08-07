@@ -58,8 +58,9 @@ const Loader: React.FC<LoaderProps> = ({ onLoad, onStart }: LoaderProps) => {
         const autoReveal = !!form.getFieldValue("autoReveal");
         const shiningBeforeReveal = !!form.getFieldValue("shiningBeforeReveal");
         const speedFactor = parseFloat(form.getFieldValue("speedFactor"));
-        onStart({ autoReveal, shiningBeforeReveal, speedFactor });
-    }, [onStart, form]);
+        const showMedal = (data?.medal !== undefined) && (!!form.getFieldValue("showMedal"));
+        onStart({ autoReveal, shiningBeforeReveal, speedFactor, showMedal });
+    }, [onStart, form, data]);
 
     return (
         <Card
@@ -158,7 +159,7 @@ const Loader: React.FC<LoaderProps> = ({ onLoad, onStart }: LoaderProps) => {
                     </Row>
                     <Row>
                         <Form form={form} style={{ width: "100%" }} layout="inline"
-                            initialValues={{ autoReveal: false, shiningBeforeReveal: true, speedFactor: 1 }}
+                            initialValues={{ autoReveal: false, shiningBeforeReveal: true, speedFactor: 1, showMedal: true }}
                         >
                             <Form.Item name="autoReveal" label="自动运行" valuePropName="checked">
                                 <Switch />
@@ -169,6 +170,11 @@ const Loader: React.FC<LoaderProps> = ({ onLoad, onStart }: LoaderProps) => {
                             <Form.Item name="speedFactor" label="速度因子">
                                 <InputNumber min={0.1} max={10} step={0.1} />
                             </Form.Item>
+                            {data.medal === undefined ? null : (
+                                <Form.Item name="showMedal" label="显示奖牌" valuePropName="checked">
+                                    <Switch />
+                                </Form.Item>
+                            )}
                         </Form>
                     </Row>
                     <Row justify="center" style={{ marginTop: "1em" }}>

@@ -194,4 +194,5 @@ export interface BoardOptions {
     autoReveal: boolean;
     shiningBeforeReveal: boolean;
     speedFactor: number;
+    showMedal: boolean;
 }
