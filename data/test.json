@@ -17731,5 +17731,10 @@
     "duration": 7200000,
     "penaltyTime": 1200000,
     "freezeTime": 3600000,
-    "name": "Shenyang Warmup Contest"
+    "name": "Shenyang Warmup Contest",
+    "medal": {
+        "gold": 19,
+        "silver": 38,
+        "bronze": 57
+    }
 }
