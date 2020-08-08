@@ -12,3 +12,7 @@
     box-shadow: 0 5px 12px 4px rgba(0, 0, 0, 0.09), 0 -5px 12px 4px rgba(0, 0, 0, 0.09);
     transition: box-shadow 0.2s ease-out;
 }
+
+.info-message{
+    margin-top: 80vh;
+}

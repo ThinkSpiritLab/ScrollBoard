@@ -196,3 +196,8 @@ export interface BoardOptions {
     speedFactor: number;
     showMedal: boolean;
 }
+
+export const MIN_SPEED_FACTOR = 0.1;
+export const MAX_SPEED_FACTOR = 10;
+
+export const FLIP_MOVE_DURATION = 800;

@@ -8,7 +8,7 @@ import React, { useState, useEffect, useCallback, useRef, useMemo, CSSProperties
 import FlipMove from "react-flip-move";
 import { StickyContainer, Sticky } from "react-sticky";
 import { Transition } from "react-transition-group";
-import { Tooltip } from "antd";
+import { Tooltip, message } from "antd";
 
 function cvtColor(state: vo.ProblemStateKind): string | undefined {
     if (state === vo.ProblemStateKind.Passed) {
@@ -21,6 +21,10 @@ function cvtColor(state: vo.ProblemStateKind): string | undefined {
         return "orange";
     }
     return undefined;
+}
+
+function messageInfo(content: string): void {
+    void message.info({ content, className: "info-message", duration: 0.4 });
 }
 
 interface BoardProps {
@@ -70,12 +74,12 @@ const Board: React.FC<BoardProps> = ({ data, options }: BoardProps) => {
                     setHighlightItem(value);
 
                     let delay;
-                    delay = options.shiningBeforeReveal ? 1200 : (autoReveal ? 400 : 0);
+                    delay = options.shiningBeforeReveal ? 600 : (autoReveal ? 200 : 0);
                     console.log("delay", delay / speedFactor);
                     await util.delay(delay / speedFactor);  // wait for shining
                     handleNextStep();
 
-                    delay = autoReveal ? (value.accepted ? 800 : 300) : (0);
+                    delay = autoReveal ? (value.accepted ? 500 : 200) : (0);
                     console.log("delay", delay / speedFactor);
                     await util.delay(delay / speedFactor); // wait for showing result
 
@@ -85,7 +89,7 @@ const Board: React.FC<BoardProps> = ({ data, options }: BoardProps) => {
                     const curRank = team?.rank;
 
                     if (prevRank !== curRank) {
-                        delay = 2000;
+                        delay = vo.FLIP_MOVE_DURATION;
                         console.log("delay", delay / speedFactor);
                         await util.delay(delay / speedFactor); // wait for moving up
                     }
@@ -148,28 +152,36 @@ const Board: React.FC<BoardProps> = ({ data, options }: BoardProps) => {
             handleNextStep();
         }
         if (e.key === "p") {
-            setAutoReveal(a => {
-                if (a) {
-                    console.log("disable autoReveal");
-                } else {
-                    console.log("enable autoReveal");
-                }
-                return !a;
-            });
+            if (autoReveal) {
+                console.log("disable autoReveal");
+                messageInfo("禁用自动运行");
+            } else {
+                console.log("enable autoReveal");
+                messageInfo("启用自动运行");
+            }
+            setAutoReveal(a => !a);
         }
         if (e.key === "+") {
-            const s = speedFactor + 0.1;
-            if (s > 10) { return; }
+            const s = Math.min(speedFactor + 0.1, vo.MAX_SPEED_FACTOR);
             setSpeedFactor(s);
             console.log("speedFactor", s);
+            messageInfo(`速度因子：${s.toFixed(1)}`);
         }
         if (e.key === "-") {
-            const s = speedFactor - 0.1;
-            if (s < 0.1) { return; }
+            const s = Math.max(speedFactor - 0.1, vo.MIN_SPEED_FACTOR);
             setSpeedFactor(s);
             console.log("speedFactor", s);
+            messageInfo(`速度因子：${s.toFixed(1)}`);
         }
-    }, [handleNextStep, keyLock, speedFactor, state.cursor]);
+        if (e.key === "Control") {
+            let s = speedFactor + 3;
+            if (s > vo.MAX_SPEED_FACTOR) { s -= vo.MAX_SPEED_FACTOR; }
+            if (s < vo.MIN_SPEED_FACTOR) { s = vo.MIN_SPEED_FACTOR; }
+            setSpeedFactor(s);
+            console.log("speedFactor", s);
+            messageInfo(`速度因子：${s.toFixed(1)}`);
+        }
+    }, [handleNextStep, keyLock, speedFactor, state.cursor, autoReveal]);
 
     useEffect(() => {
         document.addEventListener("keydown", handleKeydown);
@@ -299,7 +311,7 @@ const Board: React.FC<BoardProps> = ({ data, options }: BoardProps) => {
                     textAlign: "center",
                     transformStyle: "preserve-3d"
                 }}
-                duration={2000 / speedFactor}
+                duration={vo.FLIP_MOVE_DURATION / speedFactor}
                 onFinish={handleMovingFinished}
             >
 

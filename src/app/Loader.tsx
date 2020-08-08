@@ -168,7 +168,7 @@ const Loader: React.FC<LoaderProps> = ({ onLoad, onStart }: LoaderProps) => {
                                 <Switch />
                             </Form.Item>
                             <Form.Item name="speedFactor" label="速度因子">
-                                <InputNumber min={0.1} max={10} step={0.1} />
+                                <InputNumber min={vo.MIN_SPEED_FACTOR} max={vo.MAX_SPEED_FACTOR} step={0.1} />
                             </Form.Item>
                             {data.medal === undefined ? null : (
                                 <Form.Item name="showMedal" label="显示奖牌" valuePropName="checked">
