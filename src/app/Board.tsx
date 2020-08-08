@@ -243,15 +243,8 @@ const Board: React.FC<BoardProps> = ({ data, options }: BoardProps) => {
             <Sticky>
                 {({ style }) => (
                     <table
-                        style={{
-                            width: "100%",
-                            fontSize: "2em",
-                            textAlign: "center",
-                            backgroundColor: "white",
-                            zIndex: 1024,
-                            boxShadow: "0 5px 8px 4px rgba(0, 0, 0, 0.09)",
-                            ...style
-                        }}
+                        className="board-head"
+                        style={style}
                     >
                         <thead>
                             <tr>
@@ -304,13 +297,7 @@ const Board: React.FC<BoardProps> = ({ data, options }: BoardProps) => {
             </Sticky>
 
             <FlipMove
-                style={{
-                    width: "100%",
-                    overflowAnchor: "none",
-                    fontSize: "2em",
-                    textAlign: "center",
-                    transformStyle: "preserve-3d"
-                }}
+                className="board-body"
                 duration={vo.FLIP_MOVE_DURATION / speedFactor}
                 onFinish={handleMovingFinished}
             >
