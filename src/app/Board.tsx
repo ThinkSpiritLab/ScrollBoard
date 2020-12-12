@@ -376,6 +376,10 @@ const Board: React.FC<BoardProps> = ({ data, options }: BoardProps) => {
 
                                         const duration = 400 / speedFactor;
 
+                                        const isFirstSolver = state.firstSolvers[p.info.id] === team.info.id;
+                                        const backgroundColor = isFirstSolver ? "orange" : cvtColor(p.state);
+                                        const color = "white";
+
                                         const grid = (style: CSSProperties) => (
                                             <span
                                                 style={{
@@ -384,8 +388,8 @@ const Board: React.FC<BoardProps> = ({ data, options }: BoardProps) => {
                                                     width: "100%",
                                                     minHeight: "1em",
                                                     borderRadius: "0.25em",
-                                                    backgroundColor: cvtColor(p.state),
-                                                    color: "white",
+                                                    backgroundColor,
+                                                    color,
                                                     transition: `opacity ${duration}ms ease-in-out`,
                                                     opacity: 1,
                                                     ...style

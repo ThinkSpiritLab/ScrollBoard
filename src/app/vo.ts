@@ -27,6 +27,7 @@ export enum ProblemStateKind {
 export interface ContestState {
     teamStates: TeamState[]
     info: dto.Contest;
+    firstSolvers: { [problemId: string]: string | undefined; } // problemId -> teamId
     cursor: {
         index: number,
         tick: number,
@@ -36,6 +37,8 @@ export interface ContestState {
 
 export function calcContestState(data: dto.Contest): ContestState {
     const teamMap: Map<string, TeamState> = new Map<string, TeamState>();
+    const firstSolvers: { [problemId: string]: string | undefined; } = {};
+
     data.teams.forEach(contestant => {
         teamMap.set(
             contestant.id,
@@ -83,6 +86,9 @@ export function calcContestState(data: dto.Contest): ContestState {
                 p.acceptTime = submission.submitTime;
                 team.solved += 1;
                 team.penalty += p.acceptTime + data.penaltyTime * 60000 * (p.tryCount - 1);
+                if (firstSolvers[p.info.id] === undefined) {
+                    firstSolvers[p.info.id] = team.info.id;
+                }
             } else {
                 p.state = ProblemStateKind.Failed;
             }
@@ -97,6 +103,7 @@ export function calcContestState(data: dto.Contest): ContestState {
     const state = {
         teamStates,
         info: data,
+        firstSolvers,
         cursor: {
             index: teamStates.length - 1,
             tick: 0,
@@ -173,6 +180,9 @@ export function* reveal(state: ContestState): Generator<HighlightItem | undefine
                 p.acceptTime = p.unrevealedSubmissions[idx].submitTime;
                 team.solved += 1;
                 team.penalty += p.acceptTime + state.info.penaltyTime * 60000 * (p.tryCount - 1);
+                if (state.firstSolvers[p.info.id] === undefined) {
+                    state.firstSolvers[p.info.id] = team.info.id;
+                }
             } else {
                 p.state = ProblemStateKind.Failed;
             }
