@@ -27,10 +27,10 @@ export enum ProblemStateKind {
 export interface ContestState {
     teamStates: TeamState[]
     info: dto.Contest;
-    cursor: { 
-        index: number, 
-        tick: number, 
-        focus: number 
+    cursor: {
+        index: number,
+        tick: number,
+        focus: number
     };
 }
 
@@ -56,6 +56,12 @@ export function calcContestState(data: dto.Contest): ContestState {
     });
 
     data.submissions.sort((lhs, rhs) => lhs.submitTime - rhs.submitTime);
+    data.problems.sort((lhs, rhs) => {
+        if (lhs.tag !== rhs.tag) {
+            return lhs.tag < rhs.tag ? (-1) : 1;
+        }
+        return 0;
+    });
 
     data.submissions.forEach(submission => {
         const team = teamMap.get(submission.teamId);
@@ -76,7 +82,7 @@ export function calcContestState(data: dto.Contest): ContestState {
                 p.state = ProblemStateKind.Passed;
                 p.acceptTime = submission.submitTime;
                 team.solved += 1;
-                team.penalty += Math.floor(p.acceptTime / 60000) * 60000 + data.penaltyTime * (p.tryCount - 1);
+                team.penalty += p.acceptTime + data.penaltyTime * 60000 * (p.tryCount - 1);
             } else {
                 p.state = ProblemStateKind.Failed;
             }
@@ -109,8 +115,13 @@ export function calcRankInplace(state: ContestState): void {
         if (lhs.penalty !== rhs.penalty) {
             return (lhs.penalty - rhs.penalty);
         }
-        if (lhs.info.name !== rhs.info.name) {
-            return lhs.info.name < rhs.info.name ? (-1) : (1);
+        // if (lhs.info.name !== rhs.info.name) {
+        //     return lhs.info.name < rhs.info.name ? (-1) : (1);
+        // }
+        const lhsId = parseInt(lhs.info.id);
+        const rhsId = parseInt(rhs.info.id);
+        if (lhsId !== rhsId) {
+            return lhsId < rhsId ? (-1) : (1);
         }
         return 0;
     });
@@ -161,7 +172,7 @@ export function* reveal(state: ContestState): Generator<HighlightItem | undefine
                 p.tryCount = p.tryCount - p.unrevealedSubmissions.length + idx + 1;
                 p.acceptTime = p.unrevealedSubmissions[idx].submitTime;
                 team.solved += 1;
-                team.penalty += Math.floor(p.acceptTime / 60000) * 60000 + state.info.penaltyTime * (p.tryCount - 1);
+                team.penalty += p.acceptTime + state.info.penaltyTime * 60000 * (p.tryCount - 1);
             } else {
                 p.state = ProblemStateKind.Failed;
             }

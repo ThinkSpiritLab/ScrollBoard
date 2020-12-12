@@ -3,7 +3,7 @@ export interface Contest {
     teams: Team[];
     submissions: Submission[];
     duration: number;
-    penaltyTime: number;
+    penaltyTime: number; // in minutes
     freezeTime: number;
     name: string;
     medal?: {
@@ -22,6 +22,7 @@ export interface Problem {
 export interface Team {
     id: string;
     name: string;
+    userName?: string;
 }
 
 export interface Submission {

@@ -18,7 +18,7 @@ function cvtColor(state: vo.ProblemStateKind): string | undefined {
         return "red";
     }
     if (state === vo.ProblemStateKind.Pending) {
-        return "orange";
+        return "#4343ff";
     }
     return undefined;
 }
@@ -162,13 +162,13 @@ const Board: React.FC<BoardProps> = ({ data, options }: BoardProps) => {
             setAutoReveal(a => !a);
         }
         if (e.key === "+") {
-            const s = Math.min(speedFactor + 0.1, vo.MAX_SPEED_FACTOR);
+            const s = Math.min(speedFactor + 0.5, vo.MAX_SPEED_FACTOR);
             setSpeedFactor(s);
             console.log("speedFactor", s);
             messageInfo(`速度因子：${s.toFixed(1)}`);
         }
         if (e.key === "-") {
-            const s = Math.max(speedFactor - 0.1, vo.MIN_SPEED_FACTOR);
+            const s = Math.max(speedFactor - 0.5, vo.MIN_SPEED_FACTOR);
             setSpeedFactor(s);
             console.log("speedFactor", s);
             messageInfo(`速度因子：${s.toFixed(1)}`);
@@ -336,7 +336,13 @@ const Board: React.FC<BoardProps> = ({ data, options }: BoardProps) => {
                                     <td style={{ width: "5%" }}>
                                         {team.rank}
                                     </td>
-                                    <Tooltip title={team.info.name}>
+                                    <Tooltip
+                                        title={
+                                            team.info.userName ?
+                                                `${team.info.userName} - ${team.info.name}`
+                                                : `${team.info.name}`
+                                        }
+                                    >
                                         <td
                                             style={{
                                                 maxWidth: `${windowWidth * 0.20}px`,
@@ -350,18 +356,23 @@ const Board: React.FC<BoardProps> = ({ data, options }: BoardProps) => {
                                         </td>
                                     </Tooltip>
                                     <td style={{ width: "10%" }}>
-                                        {`${team.solved} - ${Math.floor(team.penalty / 60000)}`}
+                                        {`${team.solved} - ${Math.round(team.penalty / 60000)}`}
                                     </td>
                                     {team.problemStates.map((p) => {
                                         const isHighlighted = highlightItem
                                             && highlightItem.teamId === team.info.id
                                             && highlightItem.problemId === p.info.id;
 
-                                        const text = p.state === vo.ProblemStateKind.Untouched ? (undefined) : (
-                                            p.state === vo.ProblemStateKind.Passed ?
-                                                `${p.tryCount} - ${Math.floor((p.acceptTime ?? 0) / 60000)}`
-                                                : `${p.tryCount}`
-                                        );
+                                        const text = (() => {
+                                            if (p.state === vo.ProblemStateKind.Untouched) {
+                                                return undefined;
+                                            }
+                                            if (p.state === vo.ProblemStateKind.Passed) {
+                                                const penalty = Math.round((p.acceptTime ?? 0) / 60000) + (p.tryCount - 1) * state.info.penaltyTime;
+                                                return `${p.tryCount} - ${penalty}`;
+                                            }
+                                            return `${p.tryCount}`;
+                                        })();
 
                                         const duration = 400 / speedFactor;
 

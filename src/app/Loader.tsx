@@ -32,6 +32,12 @@ const Loader: React.FC<LoaderProps> = ({ onLoad, onStart }: LoaderProps) => {
         if (file) {
             const content = await util.readFile(file);
             const data = JSON.parse(content) as unknown as dto.Contest; // FIXME: validate
+            data.problems.sort((lhs, rhs) => {
+                if (lhs.tag !== rhs.tag) {
+                    return lhs.tag < rhs.tag ? (-1) : 1;
+                }
+                return 0;
+            });
             setFileName(file.name);
             setData(data);
             onLoad(data);
@@ -112,10 +118,16 @@ const Loader: React.FC<LoaderProps> = ({ onLoad, onStart }: LoaderProps) => {
                                 {data.duration / 60000} 分钟
                             </Descriptions.Item>
                             <Descriptions.Item label="封榜时刻">
-                                {data.freezeTime / 60000}  分钟
+                                <InputNumber
+                                    defaultValue={data.freezeTime / 60000}
+                                    formatter={(v?: number | string) => `${String(v)}`}
+                                    onChange={(v) => data.freezeTime = Number(v) * 60000}
+                                    step = {10}
+                                />
+                                分钟
                             </Descriptions.Item>
                             <Descriptions.Item label="罚时单位">
-                                {data.penaltyTime / 60000} 分钟
+                                {data.penaltyTime} 分钟
                             </Descriptions.Item>
                             <Descriptions.Item label="题目数量">
                                 {data.problems.length}
@@ -159,7 +171,7 @@ const Loader: React.FC<LoaderProps> = ({ onLoad, onStart }: LoaderProps) => {
                     </Row>
                     <Row>
                         <Form form={form} style={{ width: "100%" }} layout="inline"
-                            initialValues={{ autoReveal: false, shiningBeforeReveal: true, speedFactor: 1, showMedal: true }}
+                            initialValues={{ autoReveal: false, shiningBeforeReveal: true, speedFactor: 2, showMedal: true }}
                         >
                             <Form.Item name="autoReveal" label="自动运行" valuePropName="checked">
                                 <Switch />

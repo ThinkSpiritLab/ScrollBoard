@@ -1,10 +1,10 @@
-.team{
+.team {
     width: 100%;
     border: 1px solid #f0f0f0;
     box-shadow: none;
 }
 
-.focused-team{
+.focused-team {
     width: 100%;
     position: relative;
     z-index: 512;
@@ -13,11 +13,11 @@
     transition: box-shadow 0.2s ease-out;
 }
 
-.info-message{
+.info-message {
     margin-top: 80vh;
 }
 
-.board-head{
+.board-head {
     width: 100%;
     font-size: 2em;
     text-align: center;
@@ -26,10 +26,10 @@
     box-shadow: "0 5px 8px 4px rgba(0, 0, 0, 0.09)"
 }
 
-.board-body{
+.board-body {
     width: 100%;
     overflow-anchor: none;
     font-size: 2em;
     text-align: center;
     transform-style: preserve-3d;
-} 
+}
