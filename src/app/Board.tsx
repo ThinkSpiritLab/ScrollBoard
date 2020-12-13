@@ -347,6 +347,7 @@ const Board: React.FC<BoardProps> = ({ data, options }: BoardProps) => {
                             style={{
                                 border: options.darkMode ? (darkBorder) : (whiteBorder),
                                 boxShadow: isFocused ? boxShadow : undefined,
+                                background: isFocused ? (options.darkMode ? "#24292e" : "white") : undefined
                             }}
                         >
                             <tbody>
