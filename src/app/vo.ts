@@ -69,7 +69,7 @@ export function calcContestState(data: dto.Contest): ContestState {
     data.submissions.forEach(submission => {
         const team = teamMap.get(submission.teamId);
         if (!team) {
-            throw new Error("invalid data");
+            return;
         }
         const p = team.problemStates.find(p => p.info.id === submission.problemId);
         if (!p) {
