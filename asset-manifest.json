@@ -1,15 +1,15 @@
 {
   "files": {
     "main.css": "/ScrollBoard/static/css/main.ff996637.chunk.css",
-    "main.js": "/ScrollBoard/static/js/main.db067249.chunk.js",
-    "main.js.map": "/ScrollBoard/static/js/main.db067249.chunk.js.map",
+    "main.js": "/ScrollBoard/static/js/main.472cea15.chunk.js",
+    "main.js.map": "/ScrollBoard/static/js/main.472cea15.chunk.js.map",
     "runtime-main.js": "/ScrollBoard/static/js/runtime-main.9636b994.js",
     "runtime-main.js.map": "/ScrollBoard/static/js/runtime-main.9636b994.js.map",
     "static/css/2.c8fdb744.chunk.css": "/ScrollBoard/static/css/2.c8fdb744.chunk.css",
     "static/js/2.712c49fa.chunk.js": "/ScrollBoard/static/js/2.712c49fa.chunk.js",
     "static/js/2.712c49fa.chunk.js.map": "/ScrollBoard/static/js/2.712c49fa.chunk.js.map",
     "index.html": "/ScrollBoard/index.html",
-    "precache-manifest.1831e028ae0dfa8064771d33cf17c1cf.js": "/ScrollBoard/precache-manifest.1831e028ae0dfa8064771d33cf17c1cf.js",
+    "precache-manifest.71d1bbfcbfa3b302cbf5dc9bf22f45ee.js": "/ScrollBoard/precache-manifest.71d1bbfcbfa3b302cbf5dc9bf22f45ee.js",
     "service-worker.js": "/ScrollBoard/service-worker.js",
     "static/css/2.c8fdb744.chunk.css.map": "/ScrollBoard/static/css/2.c8fdb744.chunk.css.map",
     "static/css/main.ff996637.chunk.css.map": "/ScrollBoard/static/css/main.ff996637.chunk.css.map",
@@ -20,6 +20,6 @@
     "static/css/2.c8fdb744.chunk.css",
     "static/js/2.712c49fa.chunk.js",
     "static/css/main.ff996637.chunk.css",
-    "static/js/main.db067249.chunk.js"
+    "static/js/main.472cea15.chunk.js"
   ]
 }
