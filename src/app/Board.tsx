@@ -9,6 +9,7 @@ import FlipMove from "react-flip-move";
 import { StickyContainer, Sticky } from "react-sticky";
 import { Transition } from "react-transition-group";
 import { Tooltip, message } from "antd";
+import { WomanOutlined } from "@ant-design/icons";
 
 function cvtColor(state: vo.ProblemStateKind): string | undefined {
     if (state === vo.ProblemStateKind.Passed) {
@@ -313,19 +314,22 @@ const Board: React.FC<BoardProps> = ({ data, options }: BoardProps) => {
                 {state.teamStates.map((team, idx) => {
                     const isFocused = idx === focusIndex;
 
-                    // let backgroundColor = "white";
-                    // if (state.info.medal && options.showMedal) {
-                    //     const goldLine = state.info.medal.gold;
-                    //     const silverLine = goldLine + state.info.medal.silver;
-                    //     const bronzeLine = silverLine + state.info.medal.bronze;
-                    //     if (idx < goldLine) {
-                    //         backgroundColor = "#fff9c0";
-                    //     } else if (idx < silverLine) {
-                    //         backgroundColor = "#f6f6f6";
-                    //     } else if (idx < bronzeLine) {
-                    //         backgroundColor = "#eddccf";
+                    // const medalColor = (() => {
+                    //     if (state.info.medal && options.showMedal) {
+                    //         const goldLine = state.info.medal.gold;
+                    //         const silverLine = goldLine + state.info.medal.silver;
+                    //         const bronzeLine = silverLine + state.info.medal.bronze;
+                    //         if (idx < goldLine) {
+                    //             return "#fff9c0";
+                    //         } else if (idx < silverLine) {
+                    //             return "#f6f6f6";
+                    //         } else if (idx < bronzeLine) {
+                    //             return "#eddccf";
+                    //         }
+                    //         return undefined;
                     //     }
-                    // }
+                    // })();
+
                     const color = options.darkMode ? "white" : undefined;
                     const boxShadow = options.darkMode ?
                         "0 5px 12px 4px rgba(255, 255, 255, 0.09), 0 -5px 12px 4px rgba(255, 255, 255, 0.09)"
@@ -353,7 +357,7 @@ const Board: React.FC<BoardProps> = ({ data, options }: BoardProps) => {
                                     }}
                                 >
                                     <td style={{ width: "5%" }}>
-                                        {team.rank}
+                                        {team.info.wildcard ? `*${team.rank}` : team.rank}
                                     </td>
                                     <Tooltip
                                         title={
@@ -368,10 +372,11 @@ const Board: React.FC<BoardProps> = ({ data, options }: BoardProps) => {
                                                 width: "20%",
                                                 whiteSpace: "nowrap",
                                                 overflow: "hidden",
-                                                textOverflow: "ellipsis"
+                                                textOverflow: "ellipsis",
                                             }}
                                         >
                                             {team.info.name}
+                                            {team.info.gender === "female" ? (<WomanOutlined style={{ color: "pink" }} />) : undefined}
                                         </td>
                                     </Tooltip>
                                     <td style={{ width: "10%" }}>

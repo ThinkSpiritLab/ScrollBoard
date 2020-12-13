@@ -23,6 +23,8 @@ export interface Team {
     id: string;
     name: string;
     userName?: string;
+    gender: string;
+    wildcard: boolean;
 }
 
 export interface Submission {

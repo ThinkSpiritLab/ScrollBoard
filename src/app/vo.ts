@@ -135,8 +135,12 @@ export function calcRankInplace(state: ContestState): void {
 
     let last_solved = 0;
     let last_penalty = 0;
-    let last_rank = 0;
+    let last_rank = 1;
     state.teamStates.forEach((team, idx) => {
+        if (team.info.wildcard) {
+            team.rank = last_rank;
+            return;
+        }
         if (team.solved < last_solved || team.penalty > last_penalty) {
             last_rank = idx + 1;
         }

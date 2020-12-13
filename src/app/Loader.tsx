@@ -186,11 +186,11 @@ const Loader: React.FC<LoaderProps> = ({ onLoad, onStart }: LoaderProps) => {
                             <Form.Item name="darkMode" label="黑暗模式" valuePropName="checked">
                                 <Switch />
                             </Form.Item>
-                            {data.medal === undefined ? null : (
+                            {/* {data.medal === undefined ? null : (
                                 <Form.Item name="showMedal" label="显示奖牌" valuePropName="checked">
                                     <Switch />
                                 </Form.Item>
-                            )}
+                            )} */}
                         </Form>
                     </Row>
                     <Row justify="center" style={{ marginTop: "1em" }}>
