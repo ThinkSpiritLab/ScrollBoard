@@ -216,6 +216,7 @@ export interface BoardOptions {
     shiningBeforeReveal: boolean;
     speedFactor: number;
     showMedal: boolean;
+    darkMode: boolean;
 }
 
 export const MIN_SPEED_FACTOR = 0.1;

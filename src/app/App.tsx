@@ -38,7 +38,6 @@ const App: React.FC = () => {
                         {/* eslint-disable-next-line @typescript-eslint/no-non-null-assertion */}
                         <Board data={data} options={options!} />
                     </Row>
-                    <div style={{ minHeight: "50vh" }}></div>
                 </>
             ) : null}
         </>

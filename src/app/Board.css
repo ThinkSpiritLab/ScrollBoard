@@ -1,16 +1,15 @@
 .team {
     width: 100%;
-    border: 1px solid #f0f0f0;
     box-shadow: none;
+    transform-style: preserve-3d;
 }
 
 .focused-team {
     width: 100%;
     position: relative;
     z-index: 512;
-    border: 1px solid transparent;
-    box-shadow: 0 5px 12px 4px rgba(0, 0, 0, 0.09), 0 -5px 12px 4px rgba(0, 0, 0, 0.09);
     transition: box-shadow 0.2s ease-out;
+    transform-style: preserve-3d;
 }
 
 .info-message {
@@ -21,7 +20,6 @@
     width: 100%;
     font-size: 2em;
     text-align: center;
-    background-color: white;
     z-index: 1024;
     box-shadow: "0 5px 8px 4px rgba(0, 0, 0, 0.09)"
 }

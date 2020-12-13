@@ -65,7 +65,8 @@ const Loader: React.FC<LoaderProps> = ({ onLoad, onStart }: LoaderProps) => {
         const shiningBeforeReveal = !!form.getFieldValue("shiningBeforeReveal");
         const speedFactor = parseFloat(form.getFieldValue("speedFactor"));
         const showMedal = (data?.medal !== undefined) && (!!form.getFieldValue("showMedal"));
-        onStart({ autoReveal, shiningBeforeReveal, speedFactor, showMedal });
+        const darkMode = !!form.getFieldValue("darkMode");
+        onStart({ autoReveal, shiningBeforeReveal, speedFactor, showMedal, darkMode });
     }, [onStart, form, data]);
 
     return (
@@ -122,7 +123,7 @@ const Loader: React.FC<LoaderProps> = ({ onLoad, onStart }: LoaderProps) => {
                                     defaultValue={data.freezeTime / 60000}
                                     formatter={(v?: number | string) => `${String(v)}`}
                                     onChange={(v) => data.freezeTime = Number(v) * 60000}
-                                    step = {10}
+                                    step={10}
                                 />
                                 分钟
                             </Descriptions.Item>
@@ -181,6 +182,9 @@ const Loader: React.FC<LoaderProps> = ({ onLoad, onStart }: LoaderProps) => {
                             </Form.Item>
                             <Form.Item name="speedFactor" label="速度因子">
                                 <InputNumber min={vo.MIN_SPEED_FACTOR} max={vo.MAX_SPEED_FACTOR} step={0.1} />
+                            </Form.Item>
+                            <Form.Item name="darkMode" label="黑暗模式" valuePropName="checked">
+                                <Switch />
                             </Form.Item>
                             {data.medal === undefined ? null : (
                                 <Form.Item name="showMedal" label="显示奖牌" valuePropName="checked">

@@ -239,7 +239,10 @@ const Board: React.FC<BoardProps> = ({ data, options }: BoardProps) => {
     }, [state.cursor]);
 
     return (
-        <StickyContainer style={{ width: "100%" }}>
+        <StickyContainer style={{
+            width: "100%",
+            backgroundColor: options.darkMode ? "#24292e" : undefined,
+        }}>
             <Sticky>
                 {({ style }) => (
                     <table
@@ -247,7 +250,12 @@ const Board: React.FC<BoardProps> = ({ data, options }: BoardProps) => {
                         style={style}
                     >
                         <thead>
-                            <tr>
+                            <tr
+                                style={{
+                                    backgroundColor: options.darkMode ? "#24292e" : "white",
+                                    color: options.darkMode ? "white" : undefined,
+                                }}
+                            >
                                 <th style={{ width: "5%" }}>
                                     <span
                                         style={{
@@ -305,32 +313,43 @@ const Board: React.FC<BoardProps> = ({ data, options }: BoardProps) => {
                 {state.teamStates.map((team, idx) => {
                     const isFocused = idx === focusIndex;
 
-                    let backgroundColor = "white";
-                    if (state.info.medal && options.showMedal) {
-                        const goldLine = state.info.medal.gold;
-                        const silverLine = goldLine + state.info.medal.silver;
-                        const bronzeLine = silverLine + state.info.medal.bronze;
-                        if (idx < goldLine) {
-                            backgroundColor = "#fff9c0";
-                        } else if (idx < silverLine) {
-                            backgroundColor = "#f6f6f6";
-                        } else if (idx < bronzeLine) {
-                            backgroundColor = "#eddccf";
-                        }
-                    }
+                    // let backgroundColor = "white";
+                    // if (state.info.medal && options.showMedal) {
+                    //     const goldLine = state.info.medal.gold;
+                    //     const silverLine = goldLine + state.info.medal.silver;
+                    //     const bronzeLine = silverLine + state.info.medal.bronze;
+                    //     if (idx < goldLine) {
+                    //         backgroundColor = "#fff9c0";
+                    //     } else if (idx < silverLine) {
+                    //         backgroundColor = "#f6f6f6";
+                    //     } else if (idx < bronzeLine) {
+                    //         backgroundColor = "#eddccf";
+                    //     }
+                    // }
+                    const color = options.darkMode ? "white" : undefined;
+                    const boxShadow = options.darkMode ?
+                        "0 5px 12px 4px rgba(255, 255, 255, 0.09), 0 -5px 12px 4px rgba(255, 255, 255, 0.09)"
+                        : "0 5px 12px 4px rgba(0, 0, 0, 0.09), 0 -5px 12px 4px rgba(0, 0, 0, 0.09)";
+
+
+                    const whiteBorder = isFocused ? "1px solid transparent" : "1px solid #f0f0f0";
+                    const darkBorder = isFocused ? "1px solid #666666" : "none";
 
                     return (
                         <table
                             key={team.info.id}
                             id={`team-id-${team.info.id}`}
                             className={(isFocused ? "focused-team" : "team")}
-                            style={{ transformStyle: "preserve-3d" }}
+                            style={{
+                                border: options.darkMode ? (darkBorder) : (whiteBorder),
+                                boxShadow: isFocused ? boxShadow : undefined,
+                            }}
                         >
                             <tbody>
                                 <tr
                                     style={{
                                         transform: isFocused ? "perspective(65535px) translateZ(1px)" : undefined,
-                                        backgroundColor
+                                        color,
                                     }}
                                 >
                                     <td style={{ width: "5%" }}>
@@ -430,6 +449,12 @@ const Board: React.FC<BoardProps> = ({ data, options }: BoardProps) => {
                     );
                 })}
             </FlipMove>
+
+            <div
+                style={{
+                    minHeight: "50vh"
+                }}
+            />
         </StickyContainer>
     );
 };
