@@ -370,9 +370,7 @@ const Board: React.FC<BoardProps> = ({ data, options }: BoardProps) => {
                                             style={{
                                                 maxWidth: `${windowWidth * 0.20}px`,
                                                 width: "20%",
-                                                whiteSpace: "nowrap",
-                                                overflow: "hidden",
-                                                textOverflow: "ellipsis",
+                                                whiteSpace: "pre-wrap",
                                             }}
                                         >
                                             {team.info.name}
