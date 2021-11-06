@@ -12,14 +12,27 @@ import { Transition } from "react-transition-group";
 import { Tooltip, message } from "antd";
 import { WomanOutlined } from "@ant-design/icons";
 
-function cvtColor(state: vo.ProblemStateKind): string | undefined {
-    if (state === vo.ProblemStateKind.Passed) {
-        return "green";
+function cvtColor(problem: vo.ProblemState): string | undefined {
+    if (problem.state === vo.ProblemStateKind.Passed) {
+        const maxScore = problem.info.score;
+        if (maxScore === undefined) {
+            return "green";
+        }
+        if (problem.highestScore === maxScore) {
+            return "#33cc33";
+        }
+        if (problem.highestScore > maxScore * 0.75) {
+            return "#cccc00";
+        }
+        if (problem.highestScore > maxScore * 0.60) {
+            return "#cc9900";
+        }
+        return "#996600";
     }
-    if (state === vo.ProblemStateKind.Failed) {
+    if (problem.state === vo.ProblemStateKind.Failed) {
         return "red";
     }
-    if (state === vo.ProblemStateKind.Pending) {
+    if (problem.state === vo.ProblemStateKind.Pending) {
         return "#4343ff";
     }
     return undefined;
@@ -403,7 +416,7 @@ const Board: React.FC<BoardProps> = ({ data, options }: BoardProps) => {
                                         const duration = 400 / speedFactor;
 
                                         const isFirstSolver = state.firstSolvers[p.info.id] === team.info.id;
-                                        const backgroundColor = isFirstSolver ? "orange" : cvtColor(p.state);
+                                        const backgroundColor = isFirstSolver ? "#006600" : cvtColor(p);
                                         const color = "white";
 
                                         const grid = (style: CSSProperties) => (
