@@ -11,12 +11,14 @@ export interface Contest {
         silver: number;
         bronze: number;
     }
+    rule?: "icpc" | "ioi" // default = "icpc"
 }
 
 export interface Problem {
     id: string;
     tag: string;
     color?: string;
+    score?: number; // required when contest.rule === "score"
 }
 
 export interface Team {
@@ -33,4 +35,5 @@ export interface Submission {
     problemId: string;
     submitTime: number;
     accepted: boolean;
+    score?: number; // required when contest.rule === "score"
 }
