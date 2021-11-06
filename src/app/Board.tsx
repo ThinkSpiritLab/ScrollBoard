@@ -81,7 +81,7 @@ const Board: React.FC<BoardProps> = ({ data, options }: BoardProps) => {
                     await util.delay(delay / speedFactor);  // wait for shining
                     handleNextStep();
 
-                    delay = autoReveal ? (value.accepted ? 500 : 200) : (0);
+                    delay = autoReveal ? (value.passed ? 500 : 200) : (0);
                     console.log("delay", delay / speedFactor);
                     await util.delay(delay / speedFactor); // wait for showing result
 
@@ -359,25 +359,43 @@ const Board: React.FC<BoardProps> = ({ data, options }: BoardProps) => {
                                                 whiteSpace: "pre-wrap",
                                             }}
                                         >
-                                            {team.info.name}
+                                            {(() => {
+                                                if (team.info.certifiedName !== undefined) {
+                                                    if (team.info.certifiedName !== team.info.name) {
+                                                        return (
+                                                            <>
+                                                                <div>{team.info.name}</div>
+                                                                <div>{team.info.certifiedName}</div>
+                                                            </>
+                                                        );
+                                                    }
+                                                }
+                                                return team.info.name;
+                                            })()}
                                             {team.info.gender === "female" ? (<WomanOutlined style={{ color: "pink" }} />) : undefined}
                                         </td>
                                     </Tooltip>
                                     <td style={{ width: "10%" }}>
-                                        {`${team.solved} - ${Math.round(team.penalty / 60000)}`}
+                                        {`${team.score} - ${Math.round(team.penalty / 60000)}`}
                                     </td>
                                     {team.problemStates.map((p) => {
                                         const isHighlighted = highlightItem
                                             && highlightItem.teamId === team.info.id
                                             && highlightItem.problemId === p.info.id;
 
-                                        const text = (() => {
+                                        const gridInner = (() => {
                                             if (p.state === vo.ProblemStateKind.Untouched) {
                                                 return undefined;
                                             }
                                             if (p.state === vo.ProblemStateKind.Passed) {
-                                                const penalty = Math.round((p.acceptTime ?? 0) / 60000) + (p.tryCount - 1) * state.info.penaltyTime;
-                                                return `${p.tryCount} - ${penalty}`;
+                                                const penalty = Math.round((p.passTime ?? 0) / 60000) + (p.passIndex ?? 0) * state.info.penaltyTime;
+                                                // return `${p.highestScore} - ${penalty}`;
+                                                return (
+                                                    <>
+                                                        <div>{p.highestScore}</div>
+                                                        <div>{penalty}</div>
+                                                    </>
+                                                );
                                             }
                                             return `${p.tryCount}`;
                                         })();
@@ -404,7 +422,7 @@ const Board: React.FC<BoardProps> = ({ data, options }: BoardProps) => {
                                                 }}
                                                 ref={isHighlighted ? highlightNodeRef : null}
                                             >
-                                                {text}
+                                                {gridInner}
                                             </span>
                                         );
 

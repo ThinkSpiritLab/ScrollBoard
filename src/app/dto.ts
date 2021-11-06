@@ -25,6 +25,7 @@ export interface Team {
     id: string;
     name: string;
     userName?: string;
+    certifiedName?: string;
     gender: string;
     wildcard: boolean;
 }
