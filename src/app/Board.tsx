@@ -3,6 +3,7 @@ import "./Board.css";
 import * as dto from "./dto";
 import * as vo from "./vo";
 import * as util from "./util";
+import { useEventListener, useWindowResize } from "./effects";
 
 import React, { useState, useEffect, useCallback, useRef, useMemo, CSSProperties } from "react";
 import FlipMove from "react-flip-move";
@@ -141,7 +142,7 @@ const Board: React.FC<BoardProps> = ({ data, options }: BoardProps) => {
         }
     }, [state]);
 
-    const handleKeydown = useCallback((e: KeyboardEvent) => {
+    useEventListener("keydown", useCallback((e: KeyboardEvent) => {
         console.log("keydown", e.key);
         if (e.key === "Enter") {
             if (state.cursor.index < 0) {
@@ -182,26 +183,16 @@ const Board: React.FC<BoardProps> = ({ data, options }: BoardProps) => {
             console.log("speedFactor", s);
             messageInfo(`速度因子：${s.toFixed(1)}`);
         }
-    }, [handleNextStep, keyLock, speedFactor, state.cursor, autoReveal]);
+    }, [handleNextStep, keyLock, speedFactor, state.cursor, autoReveal]));
 
-    useEffect(() => {
-        document.addEventListener("keydown", handleKeydown);
-        return () => document.removeEventListener("keydown", handleKeydown);
-    }, [handleKeydown]);
-
-    const handleClick = useCallback(() => {
+    useEventListener("click", useCallback(() => {
         if (state.cursor.index < 0) {
             return;
         }
         if (keyLock) { return; }
         console.log("click");
         handleNextStep();
-    }, [handleNextStep, keyLock, state.cursor]);
-
-    useEffect(() => {
-        document.addEventListener("click", handleClick);
-        return () => document.removeEventListener("click", handleClick);
-    }, [handleClick]);
+    }, [handleNextStep, keyLock, state.cursor]));
 
     useEffect(() => {
         if (state.cursor.tick !== 0 && autoReveal && state.cursor.index >= 0) {
@@ -227,13 +218,7 @@ const Board: React.FC<BoardProps> = ({ data, options }: BoardProps) => {
         }
     }, [highlightItem, options, speedFactor]);
 
-    const [windowWidth, setWindowWidth] = useState<number>(window.innerWidth);
-
-    useEffect(() => {
-        const handleResize = () => setWindowWidth(window.innerWidth);
-        window.onresize = handleResize;
-        return () => { window.onresize = null; };
-    }, []);
+    const windowWidth = useWindowResize().width;
 
     const handleMovingFinished = useCallback(() => {
         setFocusIndex(state.cursor.index);
