@@ -205,25 +205,25 @@ const Board: React.FC<BoardProps> = ({ data, options }: BoardProps) => {
 
     useEffect(() => {
         if (state.cursor.tick !== 0 && autoReveal && state.cursor.index >= 0) {
-            const timer = setInterval(() => {
+            const timer = util.runInterval(500 / speedFactor, () => {
                 if (keyLock) { return; }
                 const done = handleNextStep();
-                if (done) { clearInterval(timer); }
-            }, 500 / speedFactor);
-            return () => clearInterval(timer);
+                if (done) { timer.stop(); }
+            });
+            return () => timer.stop();
         }
     }, [state, keyLock, handleNextStep, autoReveal, speedFactor]);
 
     useEffect(() => {
         if (highlightItem && options.shiningBeforeReveal) {
             setHighlightFlag(f => !f);
-            const timer = setInterval(() => {
+            const timer = util.runInterval(400 / speedFactor, () => {
                 setHighlightFlag(f => {
                     console.log("flag", !f);
                     return !f;
                 });
-            }, 400 / speedFactor);
-            return () => clearInterval(timer);
+            });
+            return () => timer.stop();
         }
     }, [highlightItem, options, speedFactor]);
 
